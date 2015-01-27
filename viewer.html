@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+<script src="three.js"></script>
+<script src="OrbitControls.js"></script>
+<script src="FirstPersonControls.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.3.js"></script>
+
+<!-- first pass shaders -->
+
+<script id="vertexShaderFirstPass" type="x-shader/x-vertex">
+    varying vec3 worldSpaceCoords;
+    void main(){
+        //Set the world space coordinates of the back faces vertices as output.
+        worldSpaceCoords = position + vec3(0.5, 0.5, 0.5); //move it from [-0.5;0.5] to [0,1]
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+    }
+</script>
+
+<script id="fragmentShaderFirstPass" type="x-shader/x-fragment">
+    varying vec3 worldSpaceCoords;
+    void main(){
+        //The fragment's world space coordinates as fragment output.
+        gl_FragColor = vec4( worldSpaceCoords.x , worldSpaceCoords.y, worldSpaceCoords.z, 1 );
+    }
+</script>
+
+
+<!-- second pass shaders -->
+<script id="vertexShaderSecondPass" type="x-shader/x-vertex">
+	varying vec3 worldSpaceCoords;
+	varying vec4 projectedCoords;
+	
+	void main()
+	{
+		worldSpaceCoords = (modelMatrix * vec4(position + vec3(0.5, 0.5,0.5), 1.0 )).xyz;
+		gl_Position = projectionMatrix *  modelViewMatrix * vec4( position, 1.0 );
+		projectedCoords =  projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+	}
+</script>
+
+<script id="fragmentShaderSecondPass" type="x-shader/x-fragment">
+    varying vec3 worldSpaceCoords;
+    varying vec4 projectedCoords;
+
+    uniform sampler2D firstPassTexture, dataTexture; //i.e. tex and cubeTex
+    uniform float steps;
+    const int MAX_STEPS = 512;
+
+    void main( void ) {
+	    //Transform the coordinates it from [-1;1] to [0;1]
+	    vec2 firstPassTexCoord = vec2(((projectedCoords.x / projectedCoords.w) + 1.0 ) / 2.0,
+					    ((projectedCoords.y / projectedCoords.w) + 1.0 ) / 2.0 );
+
+	    //The back position is the world space position stored in the texture.
+	    vec3 backPos = texture2D(firstPassTexture, firstPassTexCoord).xyz;
+
+	    //The front position is the world space position of the second render pass.
+	    vec3 frontPos = worldSpaceCoords;
+
+	    //The direction from the front position to back position.
+	    vec3 dir = backPos - frontPos;
+	
+	    float rayLength = length(dir);
+	
+	    //Calculate how long to increment in each step.
+	    float delta = 1.0 / steps;
+
+	    //The increment in each direction for each step.
+	    vec3 deltaDirection = normalize(dir) * delta;
+	    float deltaDirectionLength = length(deltaDirection);
+
+	    //Start the ray casting from the front position.
+	    vec3 currentPosition = frontPos;
+	
+	    //The color accumulator.
+	    //vec4 accumulatedColor = vec4(0.0);
+	
+	    //The alpha value accumulated so far.
+	    float accumulatedAlpha = 0.0;
+	
+	    //How long has the ray travelled so far.
+	    float accumulatedLength = 0.0;
+	
+	    //vec4 colorSample;
+	    float alphaSample;
+
+	    //Perform the ray marching iterations
+	    for(int i = 0; i < MAX_STEPS; i++){
+		    //Get the voxel intensity value from the 3D texture.	
+		    dataSample = sampleAs3DTexture( dataTexture, currentPosition );
+	      
+		    //Allow the alpha correction customization
+		    alphaSample = colorSample * alphaCorrection;
+
+		    //Perform the composition.
+		    //accumulatedColor += (1.0 - accumulatedAlpha) * colorSample * alphaSample;
+		
+		    //Store the alpha accumulated so far.
+		    accumulatedAlpha += alphaSample;
+		
+		    //Advance the ray.
+		    currentPosition += deltaDirection;
+		    accumulatedLength += deltaDirectionLength;
+				      
+		    //If the length traversed is more than the ray length, or if the alpha accumulated reaches 1.0 then exit.
+		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 )
+			    break;
+	    }
+	    gl_FragColor  = Vec4 (200, 200, 200, accumulatedAlpha);	      
+    }
+    
+    
+    vec3 dataDims = vec3(3,3,3);
+    float sampleVolTex(vec3 pos) {
+        // note: z is up in 3D tex coords, pos.z is tex.y, pos.y is zSlice
+        float zSlice = (1.0-pos.y)*(dataDims.z-1.0); // float value of slice number, slice 0th to 63rd
+        
+        // calc pixels from top of texture
+        float fromTopPixels =
+            floor(zSlice)*dataDims.y + // offset pix from top of tex, from upper slice
+            pos.z*(dataDims.y-1.0) + // y pos in pixels, range 0th to 63rd pix
+            0.5; // offset to center of cell
+        
+        // calc y tex coords of two slices
+        float y0 = min( (fromTopPixels)/(dataDims.y*dataDims.z), 1.0);
+        float y1 = min( (fromTopPixels+dataDims.y)/(dataDims.y*dataDims.z), 1.0);
+        
+        // get (bi)linear interped texture reads at two slices
+        float z0 = texture2D(dataTexture, vec2(pos.x, y0)).g;
+        float z1 = texture2D(dataTexture, vec2(pos.x, y1)).g;
+        
+        // lerp them again (thus trilinear), using remaining fraction of zSlice
+        return mix(z0, z1, fract(zSlice));
+    }
+
+    // max 2d size is 4096 x 4096
+
+</script>
+
+
+<script src="viewer.js"></script>
+</body>
+</html>
+
