@@ -1,7 +1,7 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
 var meshFirstPass;
 
-var alphaCorrection = 1.0;
+var alphaCorrection = 1.0/255.0;
 var tex
 
 initVis();
@@ -12,11 +12,11 @@ function initVis() {
     
     /*** Camera ***/
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
-    camera.position.set(0, 0, 0)
+    camera.position.set(-1.73, 0.13, 0.9)
 
     /***************** Data Cloud **********************/
     // load texture
-    dataTexture = THREE.ImageUtils.loadTexture('test_data.png');
+    dataTexture = THREE.ImageUtils.loadTexture('test_data_rgba.png');
 
 
     /*** first pass ***/
@@ -58,7 +58,6 @@ function initVis() {
     sceneSecondPass = new THREE.Scene();
     var meshSecondPass = new THREE.Mesh( boxGeometry, materialSecondPass );
     sceneSecondPass.add( meshSecondPass );  
-    
 
     /*************** Scene etc ************/
     renderer = new THREE.WebGLRenderer();
@@ -90,7 +89,7 @@ function update() {
 
 
 function render() {
-	var delta = clock.getDelta();
+    var delta = clock.getDelta();
     controls.update(delta);
     //Render first pass and store the world space coords of the back face fragments into the texture.
     renderer.render( sceneFirstPass, camera);

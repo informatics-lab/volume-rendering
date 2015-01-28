@@ -6,10 +6,10 @@
 </head>
 <body>
 
-<script src="three.js"></script>
+<script src="../bower_components/threejs/build/three.js"></script>
 <script src="OrbitControls.js"></script>
 <script src="FirstPersonControls.js"></script>
-<script src="https://code.jquery.com/jquery-2.1.3.js"></script>
+<!--<script src="../bower_components/jquery/dists/jquery.js"></script>-->
 
 <!-- first pass shaders -->
 
@@ -47,10 +47,46 @@
 <script id="fragmentShaderSecondPass" type="x-shader/x-fragment">
     varying vec3 worldSpaceCoords;
     varying vec4 projectedCoords;
+    varying vec2 vUv;
 
     uniform sampler2D firstPassTexture, dataTexture; //i.e. tex and cubeTex
     uniform float steps;
+    uniform float alphaCorrection;
     const int MAX_STEPS = 512;
+    
+    vec3 dataDims = vec3(4, 4, 4);
+    /*vec4 sampleAs3DTexture(sampler2D tex, vec3 pos) {
+        // note: z is up in 3D tex coords, pos.z is tex.y, pos.y is zSlice
+        float zSlice = (1.0-pos.y)*(dataDims.z-1.0); // float value of slice number, slice 0th to 63rd
+        
+        // calc pixels from top of texture
+        float fromTopPixels =
+            floor(zSlice)*dataDims.y + // offset pix from top of tex, from upper slice
+            pos.z*(dataDims.y-1.0) + // y pos in pixels, range 0th to 63rd pix
+            0.5; // offset to center of cell
+        
+        // calc y tex coords of two slices
+        float y0 = min( (fromTopPixels)/(dataDims.y*dataDims.z), 1.0);
+        float y1 = min( (fromTopPixels+dataDims.y)/(dataDims.y*dataDims.z), 1.0);
+        
+        // get (bi)linear interped texture reads at two slices
+        float sample0 = texture2D(tex, vec2(pos.x, y0)).g;
+        float sample1 = texture2D(tex, vec2(pos.x, y1)).g;
+        
+        // lerp them again (thus trilinear), using remaining fraction of zSlice
+        return mix(sample0, sample1, fract(zSlice));
+    }*/
+    
+    vec4 sampleAs3DTexture(sampler2D tex, vec3 pos) {
+        float zSlice = pos.y;
+        float p = zSlice * dataDims.x + pos.x + 0.5;
+        float q = pos.z + 0.5;
+
+        lowp vec4 sample = texture2D(tex, vec2(p, q));
+        return sample;
+    }
+
+    // max 2d size is 4096 x 4096
 
     void main( void ) {
 	    //Transform the coordinates it from [-1;1] to [0;1]
@@ -79,7 +115,7 @@
 	    vec3 currentPosition = frontPos;
 	
 	    //The color accumulator.
-	    //vec4 accumulatedColor = vec4(0.0);
+	    vec4 accumulatedColor = vec4(0.0);
 	
 	    //The alpha value accumulated so far.
 	    float accumulatedAlpha = 0.0;
@@ -87,20 +123,23 @@
 	    //How long has the ray travelled so far.
 	    float accumulatedLength = 0.0;
 	
-	    //vec4 colorSample;
+	    //vec4 dataSample;
+	    vec4 dataSample;
+
 	    float alphaSample;
 
 	    //Perform the ray marching iterations
 	    for(int i = 0; i < MAX_STEPS; i++){
 		    //Get the voxel intensity value from the 3D texture.	
-		    dataSample = sampleAs3DTexture( dataTexture, currentPosition );
+		    dataSample = sampleAs3DTexture(dataTexture, currentPosition);
 	      
 		    //Allow the alpha correction customization
-		    alphaSample = colorSample * alphaCorrection;
+		    alphaSample = dataSample.a * alphaCorrection;
 
 		    //Perform the composition.
-		    //accumulatedColor += (1.0 - accumulatedAlpha) * colorSample * alphaSample;
-		
+		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample;// * alphaSample;
+			//accumulatedColor += dataSample;
+
 		    //Store the alpha accumulated so far.
 		    accumulatedAlpha += alphaSample;
 		
@@ -110,36 +149,10 @@
 				      
 		    //If the length traversed is more than the ray length, or if the alpha accumulated reaches 1.0 then exit.
 		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 )
-			    break;
+				break;
 	    }
-	    gl_FragColor  = Vec4 (200, 200, 200, accumulatedAlpha);	      
+	    gl_FragColor = accumulatedColor;
     }
-    
-    
-    vec3 dataDims = vec3(3,3,3);
-    float sampleVolTex(vec3 pos) {
-        // note: z is up in 3D tex coords, pos.z is tex.y, pos.y is zSlice
-        float zSlice = (1.0-pos.y)*(dataDims.z-1.0); // float value of slice number, slice 0th to 63rd
-        
-        // calc pixels from top of texture
-        float fromTopPixels =
-            floor(zSlice)*dataDims.y + // offset pix from top of tex, from upper slice
-            pos.z*(dataDims.y-1.0) + // y pos in pixels, range 0th to 63rd pix
-            0.5; // offset to center of cell
-        
-        // calc y tex coords of two slices
-        float y0 = min( (fromTopPixels)/(dataDims.y*dataDims.z), 1.0);
-        float y1 = min( (fromTopPixels+dataDims.y)/(dataDims.y*dataDims.z), 1.0);
-        
-        // get (bi)linear interped texture reads at two slices
-        float z0 = texture2D(dataTexture, vec2(pos.x, y0)).g;
-        float z1 = texture2D(dataTexture, vec2(pos.x, y1)).g;
-        
-        // lerp them again (thus trilinear), using remaining fraction of zSlice
-        return mix(z0, z1, fract(zSlice));
-    }
-
-    // max 2d size is 4096 x 4096
 
 </script>
 
