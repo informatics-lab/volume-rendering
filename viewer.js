@@ -16,7 +16,7 @@ function initVis() {
 
     /***************** Data Cloud **********************/
     // load texture
-    dataTexture = THREE.ImageUtils.loadTexture('test_data.png');
+    //dataTexture = THREE.ImageUtils.loadTexture('test_data.png');
 
 
     /*** first pass ***/
@@ -44,7 +44,7 @@ function initVis() {
                                                type: THREE.FloatType } );
     
     /*** second pass ***/
-    materialSecondPass = new THREE.ShaderMaterial( {
+    /*materialSecondPass = new THREE.ShaderMaterial( {
         vertexShader: document.getElementById( 'vertexShaderSecondPass' ).textContent,
         fragmentShader: document.getElementById( 'fragmentShaderSecondPass' ).textContent,
         side: THREE.FrontSide,
@@ -58,7 +58,7 @@ function initVis() {
     sceneSecondPass = new THREE.Scene();
     var meshSecondPass = new THREE.Mesh( boxGeometry, materialSecondPass );
     sceneSecondPass.add( meshSecondPass );  
-    
+    */
 
     /*************** Scene etc ************/
     renderer = new THREE.WebGLRenderer();
@@ -90,10 +90,10 @@ function update() {
 
 
 function render() {
-	var delta = clock.getDelta();
+    var delta = clock.getDelta();
     controls.update(delta);
     //Render first pass and store the world space coords of the back face fragments into the texture.
     renderer.render( sceneFirstPass, camera);
     //Render the second pass and perform the volume rendering.
-    renderer.render( sceneSecondPass, camera );
+    //renderer.render( sceneSecondPass, camera );
 }
