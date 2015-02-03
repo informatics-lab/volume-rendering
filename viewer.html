@@ -9,7 +9,7 @@
 <script src="../bower_components/threejs/build/three.js"></script>
 <script src="OrbitControls.js"></script>
 <script src="FirstPersonControls.js"></script>
-<script src="../bower_components/jquery/dists/jquery.js"></script>
+<!--<script src="../bower_components/jquery/dists/jquery.js"></script>-->
 
 <!-- first pass shaders -->
 
@@ -135,10 +135,10 @@
 		    accumulatedLength += deltaDirectionLength;
 				      
 		    //If the length traversed is more than the ray length, or if the alpha accumulated reaches 1.0 then exit.
-		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 )
+		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 )	
 			    break;
 	    }
-	    gl_FragColor  = vec4 (200, 200, 200, accumulatedAlpha);	      
+	    gl_FragColor = vec4 (0.5, 0.5, 0.5, accumulatedAlpha);//accumulatedAlpha);    
     }
 
 </script>

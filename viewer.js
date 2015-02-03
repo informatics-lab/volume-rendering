@@ -1,7 +1,7 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
 var meshFirstPass;
 
-var alphaCorrection = 1.0;
+var alphaCorrection = 0.00001;
 var tex
 
 initVis();
@@ -12,7 +12,7 @@ function initVis() {
     
     /*** Camera ***/
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
-    camera.position.set(0, 0, 0)
+    camera.position.set(-1.73, 0.13, 0.9)
 
     /***************** Data Cloud **********************/
     // load texture
