@@ -65,15 +65,15 @@
             0.5; // offset to center of cell
         
         // calc y tex coords of two slices
-        float y0 = min( (fromTopPixels)/(dataDims.y*dataDims.z), 1.0);
-        float y1 = min( (fromTopPixels+dataDims.y)/(dataDims.y*dataDims.z), 1.0);
+        float y0 = min( (fromTopPixels)/(dataDims.y*dataDims.z), 1.0).g;
+        float y1 = min( (fromTopPixels+dataDims.y)/(dataDims.y*dataDims.z), 1.0).g;
         
         // get (bi)linear interped texture reads at two slices
-        float z0 = texture2D(tex, vec2(pos.x, y0)).g;
-        float z1 = texture2D(tex, vec2(pos.x, y1)).g;
+        vec4 sample0 = texture2D(tex, vec2(pos.x, y0));
+        vec4 sample1 = texture2D(tex, vec2(pos.x, y1));
         
         // lerp them again (thus trilinear), using remaining fraction of zSlice
-        return mix(z0, z1, fract(zSlice));
+        return mix(sample0, sample1, fract(zSlice));
     }
 
     // max 2d size is 4096 x 4096
@@ -105,7 +105,7 @@
 	    vec3 currentPosition = frontPos;
 	
 	    //The color accumulator.
-	    //vec4 accumulatedColor = vec4(0.0);
+	    vec4 accumulatedColor = vec4(0.0);
 	
 	    //The alpha value accumulated so far.
 	    float accumulatedAlpha = 0.0;
@@ -113,19 +113,21 @@
 	    //How long has the ray travelled so far.
 	    float accumulatedLength = 0.0;
 	
-	    //vec4 colorSample;
+	    //vec4 dataSample;
+	    vec4 dataSample;
+
 	    float alphaSample;
 
 	    //Perform the ray marching iterations
 	    for(int i = 0; i < MAX_STEPS; i++){
 		    //Get the voxel intensity value from the 3D texture.	
-		    float dataSample = sampleAs3DTexture( dataTexture, currentPosition );
+		    dataSample = sampleAs3DTexture( dataTexture, currentPosition );
 	      
 		    //Allow the alpha correction customization
-		    float alphaSample = dataSample * alphaCorrection;
+		    alphaSample = dataSample.a * alphaCorrection;
 
 		    //Perform the composition.
-		    //accumulatedColor += (1.0 - accumulatedAlpha) * colorSample * alphaSample;
+		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample * alphaSample;
 		
 		    //Store the alpha accumulated so far.
 		    accumulatedAlpha += alphaSample;

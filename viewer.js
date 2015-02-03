@@ -16,7 +16,7 @@ function initVis() {
 
     /***************** Data Cloud **********************/
     // load texture
-    dataTexture = THREE.ImageUtils.loadTexture('test_data.png');
+    dataTexture = THREE.ImageUtils.loadTexture('test_data_rgba.png');
 
 
     /*** first pass ***/
