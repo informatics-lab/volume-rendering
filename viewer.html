@@ -77,12 +77,12 @@
         return mix(sample0, sample1, fract(zSlice));
     }*/
     
-    vec3 sampleAs3DTexture(sampler2D tex, vec3 pos) {
+    vec4 sampleAs3DTexture(sampler2D tex, vec3 pos) {
         float zSlice = pos.y;
         float p = zSlice * dataDims.x + pos.x + 0.5;
         float q = pos.z + 0.5;
 
-        lowp vec3 sample = texture2D(tex, vec2(p, q)).xyz;
+        lowp vec4 sample = texture2D(tex, vec2(p, q));
         return sample;
     }
 
@@ -94,7 +94,7 @@
 					    ((projectedCoords.y / projectedCoords.w) + 1.0 ) / 2.0 );
 
 	    //The back position is the world space position stored in the texture.
-	    vec3 backPos = sampleAs3DTexture(firstPassTexture, firstPassTexCoord);
+	    vec3 backPos = texture2D(firstPassTexture, firstPassTexCoord).xyz;
 
 	    //The front position is the world space position of the second render pass.
 	    vec3 frontPos = worldSpaceCoords;
@@ -131,14 +131,15 @@
 	    //Perform the ray marching iterations
 	    for(int i = 0; i < MAX_STEPS; i++){
 		    //Get the voxel intensity value from the 3D texture.	
-		    dataSample = sampleAs3DTexture(dataTexture, currentPosition);//sampleAs3DTexture( dataTexture, currentPosition );
+		    dataSample = sampleAs3DTexture(dataTexture, currentPosition);
 	      
 		    //Allow the alpha correction customization
-		    alphaSample = dataSample.r * alphaCorrection; // HACK HACK HACK
+		    alphaSample = dataSample.a * alphaCorrection;
 
 		    //Perform the composition.
-		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample * alphaSample;
-		
+		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample;// * alphaSample;
+			//accumulatedColor += dataSample;
+
 		    //Store the alpha accumulated so far.
 		    accumulatedAlpha += alphaSample;
 		
@@ -147,8 +148,8 @@
 		    accumulatedLength += deltaDirectionLength;
 				      
 		    //If the length traversed is more than the ray length, or if the alpha accumulated reaches 1.0 then exit.
-		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 )	
-			    break;
+		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 )
+				break;
 	    }
 	    gl_FragColor = accumulatedColor;
     }
