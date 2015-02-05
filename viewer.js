@@ -1,7 +1,7 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
 var meshFirstPass;
 
-var alphaCorrection = 1.0/255.0;
+var alphaCorrection = 1.0;
 var tex
 
 initVis();
@@ -18,6 +18,8 @@ function initVis() {
     // load texture
     dataTexture = THREE.ImageUtils.loadTexture('test_data_rgba.png');
 
+    var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
+    boxGeometry.doubleSided = true;
 
     /*** first pass ***/
 	var materialFirstPass = new THREE.ShaderMaterial( {
@@ -26,12 +28,9 @@ function initVis() {
         side: THREE.BackSide
     });
 
-    sceneFirstPass = new THREE.Scene();
-
-    var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
-    boxGeometry.doubleSided = true;
-  
     meshFirstPass = new THREE.Mesh( boxGeometry, materialFirstPass );
+    
+    sceneFirstPass = new THREE.Scene();
     sceneFirstPass.add( meshFirstPass );
 
 
@@ -42,6 +41,8 @@ function initVis() {
                                                magFilter: THREE.NearestFilter,
                                                format: THREE.RGBFormat,
                                                type: THREE.FloatType } );
+
+    firstPassTexture.wrapS = firstPassTexture.wrapT = THREE.ClampToEdgeWrapping;    
     
     /*** second pass ***/
     materialSecondPass = new THREE.ShaderMaterial( {
@@ -49,10 +50,10 @@ function initVis() {
         fragmentShader: document.getElementById( 'fragmentShaderSecondPass' ).textContent,
         side: THREE.FrontSide,
         uniforms: { firstPassTexture: { type: "t", value: firstPassTexture },
-        dataTexture: { type: "t", value: dataTexture },
-        //transferTex: { type: "t", value: transferTexture },
-        steps : {type: "1f" , value: 20.0}, // so we know how long to make in incriment 
-        alphaCorrection : {type: "1f" , value: alphaCorrection }}
+                         dataTexture: { type: "t", value: dataTexture },
+                       //transferTex: {type: "t", value: transferTexture },
+                         steps : {type: "1f" , value: 20.0}, // so we know how long to make in incriment 
+                         alphaCorrection : {type: "1f" , value: alphaCorrection }}
     });
 
     sceneSecondPass = new THREE.Scene();
@@ -66,13 +67,28 @@ function initVis() {
 
     document.body.appendChild(renderer.domElement);
 
-    controls = new THREE.FirstPersonControls(camera, renderer.domElement);
-    controls.moveSpeed *= 30;
+    //controls = new THREE.FirstPersonControls(camera, 
+    // controls.moveSpeed *= 100;
 
+    // trackball controls
+    controls = new THREE.TrackballControls(camera, renderer.domElement);
+    controls.rotateSpeed = 1.0;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 1.0;
+    controls.dynamicDampingFactor = 0.3;
+    controls.staticMoving = false;
+    controls.noZoom = false;
+    controls.noPan = false;
      /*** light ***/
   /*  var directionalLight = new THREE.DirectionalLight(0xffff55, 1);
     directionalLight.position.set(-600, 300, -600);
     scene.add(directionalLight);*/
+
+    var anotherBoxGeometry = new THREE.BoxGeometry(3, 3, 3);
+    var anotherMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
+    var anotherBoxMesh = new THREE.Mesh( anotherBoxGeometry, anotherMaterial );
+    sceneSecondPass.add(anotherBoxMesh);
+    anotherBoxMesh.position = new THREE.Vector3( 2., 2., 2.);
 }
 
 
@@ -90,9 +106,10 @@ function update() {
 
 function render() {
     var delta = clock.getDelta();
-    controls.update(delta);
+    //controls.update(delta);
+    controls.update();
     //Render first pass and store the world space coords of the back face fragments into the texture.
-    renderer.render( sceneFirstPass, camera);
+    renderer.render( sceneFirstPass, camera, firstPassTexture, true);
     //Render the second pass and perform the volume rendering.
     renderer.render( sceneSecondPass, camera );
 }

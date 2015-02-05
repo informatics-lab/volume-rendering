@@ -7,8 +7,7 @@
 <body>
 
 <script src="../bower_components/threejs/build/three.js"></script>
-<script src="OrbitControls.js"></script>
-<script src="FirstPersonControls.js"></script>
+<script type="text/javascript" src=	"./TrackballControls.js"></script>
 <!--<script src="../bower_components/jquery/dists/jquery.js"></script>-->
 
 <!-- first pass shaders -->
@@ -38,7 +37,7 @@
 	
 	void main()
 	{
-		worldSpaceCoords = (modelMatrix * vec4(position + vec3(0.5, 0.5,0.5), 1.0 )).xyz;
+		worldSpaceCoords = (modelMatrix * vec4(position + vec3(0.5, 0.5, 0.5), 1.0 )).xyz;
 		gl_Position = projectionMatrix *  modelViewMatrix * vec4( position, 1.0 );
 		projectedCoords =  projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 	}
@@ -47,7 +46,6 @@
 <script id="fragmentShaderSecondPass" type="x-shader/x-fragment">
     varying vec3 worldSpaceCoords;
     varying vec4 projectedCoords;
-    varying vec2 vUv;
 
     uniform sampler2D firstPassTexture, dataTexture; //i.e. tex and cubeTex
     uniform float steps;
@@ -55,35 +53,18 @@
     const int MAX_STEPS = 512;
     
     vec3 dataDims = vec3(4, 4, 4);
-    /*vec4 sampleAs3DTexture(sampler2D tex, vec3 pos) {
-        // note: z is up in 3D tex coords, pos.z is tex.y, pos.y is zSlice
-        float zSlice = (1.0-pos.y)*(dataDims.z-1.0); // float value of slice number, slice 0th to 63rd
-        
-        // calc pixels from top of texture
-        float fromTopPixels =
-            floor(zSlice)*dataDims.y + // offset pix from top of tex, from upper slice
-            pos.z*(dataDims.y-1.0) + // y pos in pixels, range 0th to 63rd pix
-            0.5; // offset to center of cell
-        
-        // calc y tex coords of two slices
-        float y0 = min( (fromTopPixels)/(dataDims.y*dataDims.z), 1.0);
-        float y1 = min( (fromTopPixels+dataDims.y)/(dataDims.y*dataDims.z), 1.0);
-        
-        // get (bi)linear interped texture reads at two slices
-        float sample0 = texture2D(tex, vec2(pos.x, y0)).g;
-        float sample1 = texture2D(tex, vec2(pos.x, y1)).g;
-        
-        // lerp them again (thus trilinear), using remaining fraction of zSlice
-        return mix(sample0, sample1, fract(zSlice));
-    }*/
-    
+ 
     vec4 sampleAs3DTexture(sampler2D tex, vec3 pos) {
-        float zSlice = pos.y;
-        float p = zSlice * dataDims.x + pos.x + 0.5;
-        float q = pos.z + 0.5;
+    	// pos is in UV coords i.e. 0->1. We also want to interrogate out texture in the range 0->1
+    	// however, our 3D dimensions are conceptually 4,4,4
+    	float nTiles = dataDims.z;
+    	float tileWidth = 1.0 / nTiles;
+    	float p = pos.y * tileWidth + pos.x / nTiles;
+    	float q = pos.z;
 
-        lowp vec4 sample = texture2D(tex, vec2(p, q));
-        return sample;
+        lowp vec4 sample = texture2D(tex, vec2(p, q)); //I think this fn might convert from 255 range to 0->1 range
+    	vec4 returnSample = vec4(0.5, 0., 0., sample.x); // alpha is 255 in png so overwrite
+        return returnSample;
     }
 
     // max 2d size is 4096 x 4096
@@ -134,10 +115,10 @@
 		    dataSample = sampleAs3DTexture(dataTexture, currentPosition);
 	      
 		    //Allow the alpha correction customization
-		    alphaSample = dataSample.a * alphaCorrection;
+		    alphaSample = dataSample.a;
 
 		    //Perform the composition.
-		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample;// * alphaSample;
+		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample * alphaSample;
 			//accumulatedColor += dataSample;
 
 		    //Store the alpha accumulated so far.
