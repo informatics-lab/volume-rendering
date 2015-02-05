@@ -47,14 +47,15 @@
 <script id="fragmentShaderSecondPass" type="x-shader/x-fragment">
     varying vec3 worldSpaceCoords;
     varying vec4 projectedCoords;
+    varying vec2 vUv;
 
     uniform sampler2D firstPassTexture, dataTexture; //i.e. tex and cubeTex
     uniform float steps;
     uniform float alphaCorrection;
     const int MAX_STEPS = 512;
     
-    vec3 dataDims = vec3(3,3,3);
-    float sampleAs3DTexture(sampler2D tex, vec3 pos) {
+    vec3 dataDims = vec3(4, 4, 4);
+    /*vec4 sampleAs3DTexture(sampler2D tex, vec3 pos) {
         // note: z is up in 3D tex coords, pos.z is tex.y, pos.y is zSlice
         float zSlice = (1.0-pos.y)*(dataDims.z-1.0); // float value of slice number, slice 0th to 63rd
         
@@ -65,15 +66,24 @@
             0.5; // offset to center of cell
         
         // calc y tex coords of two slices
-        float y0 = min( (fromTopPixels)/(dataDims.y*dataDims.z), 1.0).g;
-        float y1 = min( (fromTopPixels+dataDims.y)/(dataDims.y*dataDims.z), 1.0).g;
+        float y0 = min( (fromTopPixels)/(dataDims.y*dataDims.z), 1.0);
+        float y1 = min( (fromTopPixels+dataDims.y)/(dataDims.y*dataDims.z), 1.0);
         
         // get (bi)linear interped texture reads at two slices
-        vec4 sample0 = texture2D(tex, vec2(pos.x, y0));
-        vec4 sample1 = texture2D(tex, vec2(pos.x, y1));
+        float sample0 = texture2D(tex, vec2(pos.x, y0)).g;
+        float sample1 = texture2D(tex, vec2(pos.x, y1)).g;
         
         // lerp them again (thus trilinear), using remaining fraction of zSlice
         return mix(sample0, sample1, fract(zSlice));
+    }*/
+    
+    vec3 sampleAs3DTexture(sampler2D tex, vec3 pos) {
+        float zSlice = pos.y;
+        float p = zSlice * dataDims.x + pos.x + 0.5;
+        float q = pos.z + 0.5;
+
+        lowp vec3 sample = texture2D(tex, vec2(p, q)).xyz;
+        return sample;
     }
 
     // max 2d size is 4096 x 4096
@@ -84,7 +94,7 @@
 					    ((projectedCoords.y / projectedCoords.w) + 1.0 ) / 2.0 );
 
 	    //The back position is the world space position stored in the texture.
-	    vec3 backPos = texture2D(firstPassTexture, firstPassTexCoord).xyz;
+	    vec3 backPos = sampleAs3DTexture(firstPassTexture, firstPassTexCoord);
 
 	    //The front position is the world space position of the second render pass.
 	    vec3 frontPos = worldSpaceCoords;
@@ -121,10 +131,10 @@
 	    //Perform the ray marching iterations
 	    for(int i = 0; i < MAX_STEPS; i++){
 		    //Get the voxel intensity value from the 3D texture.	
-		    dataSample = sampleAs3DTexture( dataTexture, currentPosition );
+		    dataSample = sampleAs3DTexture(dataTexture, currentPosition);//sampleAs3DTexture( dataTexture, currentPosition );
 	      
 		    //Allow the alpha correction customization
-		    alphaSample = dataSample.a * alphaCorrection;
+		    alphaSample = dataSample.r * alphaCorrection; // HACK HACK HACK
 
 		    //Perform the composition.
 		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample * alphaSample;
@@ -140,7 +150,7 @@
 		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 )	
 			    break;
 	    }
-	    gl_FragColor = vec4 (0.5, 0.5, 0.5, accumulatedAlpha);//accumulatedAlpha);    
+	    gl_FragColor = accumulatedColor;
     }
 
 </script>
