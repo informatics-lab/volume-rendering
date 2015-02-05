@@ -1,7 +1,7 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
 var meshFirstPass;
 
-var alphaCorrection = 1.0;
+var alphaCorrection = 0.01;
 var tex
 
 initVis();
