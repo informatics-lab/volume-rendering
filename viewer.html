@@ -7,8 +7,7 @@
 <body>
 
 <script src="../bower_components/threejs/build/three.js"></script>
-<script src="OrbitControls.js"></script>
-<script src="FirstPersonControls.js"></script>
+<script type="text/javascript" src=	"./TrackballControls.js"></script>
 <!--<script src="../bower_components/jquery/dists/jquery.js"></script>-->
 
 <!-- first pass shaders -->
@@ -64,7 +63,7 @@
     	float q = pos.z;
 
         lowp vec4 sample = texture2D(tex, vec2(p, q));
-    	vec4 returnSample = vec4(sample.xyz, 0.2); // alpha is 255 in png so overwrite
+    	vec4 returnSample = vec4(0.5, 0., 0., sample.x/100.); // alpha is 255 in png so overwrite
         return returnSample;
     }
 
@@ -116,10 +115,10 @@
 		    dataSample = sampleAs3DTexture(dataTexture, currentPosition);
 	      
 		    //Allow the alpha correction customization
-		    alphaSample = dataSample.a * 0.;
+		    alphaSample = dataSample.a;
 
 		    //Perform the composition.
-		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample;
+		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample * alphaSample;
 			//accumulatedColor += dataSample;
 
 		    //Store the alpha accumulated so far.

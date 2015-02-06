@@ -67,9 +67,18 @@ function initVis() {
 
     document.body.appendChild(renderer.domElement);
 
-    controls = new THREE.FirstPersonControls(camera, renderer.domElement);
-    controls.moveSpeed *= 30;
+    //controls = new THREE.FirstPersonControls(camera, 
+    // controls.moveSpeed *= 100;
 
+    // trackball controls
+    controls = new THREE.TrackballControls(camera, renderer.domElement);
+    controls.rotateSpeed = 1.0;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 1.0;
+    controls.dynamicDampingFactor = 0.3;
+    controls.staticMoving = false;
+    controls.noZoom = false;
+    controls.noPan = false;
      /*** light ***/
   /*  var directionalLight = new THREE.DirectionalLight(0xffff55, 1);
     directionalLight.position.set(-600, 300, -600);
@@ -97,7 +106,8 @@ function update() {
 
 function render() {
     var delta = clock.getDelta();
-    controls.update(delta);
+    //controls.update(delta);
+    controls.update();
     //Render first pass and store the world space coords of the back face fragments into the texture.
     renderer.render( sceneFirstPass, camera, firstPassTexture, true);
     //Render the second pass and perform the volume rendering.
