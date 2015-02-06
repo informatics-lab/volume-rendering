@@ -1,7 +1,7 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
 var meshFirstPass;
 
-var alphaCorrection = 1.0;
+var alphaCorrection = 1.5;
 var tex
 
 initVis();
@@ -55,13 +55,15 @@ function initVis() {
                          steps : {type: "1f" , value: 20.0}, // so we know how long to make in incriment 
                          alphaCorrection : {type: "1f" , value: alphaCorrection }}
     });
+    materialSecondPass.transparent = true;
+    materialSecondPass.blending = "NormalBlending";
 
     sceneSecondPass = new THREE.Scene();
     var meshSecondPass = new THREE.Mesh( boxGeometry, materialSecondPass );
     sceneSecondPass.add( meshSecondPass );  
 
     /*************** Scene etc ************/
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer( {alpha: true} );
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor( "rgb(135, 206, 250)", 1);
 

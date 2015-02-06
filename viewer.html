@@ -63,7 +63,7 @@
     	float q = pos.z;
 
         lowp vec4 sample = texture2D(tex, vec2(p, q)); //I think this fn might convert from 255 range to 0->1 range
-    	vec4 returnSample = vec4(0.5, 0., 0., sample.x); // alpha is 255 in png so overwrite
+    	vec4 returnSample = vec4(0.7, 0., 0., sample.x); // alpha is 255 in png so overwrite
         return returnSample;
     }
 
