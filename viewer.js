@@ -66,7 +66,6 @@ function initVis() {
     renderer = new THREE.WebGLRenderer( { antialias: true} );
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor( "rgb(135, 206, 250)", 1);
-    renderer.sortObjects = true;
 
     document.body.appendChild(renderer.domElement);
 
