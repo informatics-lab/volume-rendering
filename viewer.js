@@ -1,7 +1,8 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
 var meshFirstPass;
 
-var alphaCorrection = 1.5;
+var alphaCorrection = 5.0; // just a fudge factor
+var nSteps = 2000;
 var tex
 
 initVis();
@@ -52,20 +53,20 @@ function initVis() {
         uniforms: { firstPassTexture: { type: "t", value: firstPassTexture },
                          dataTexture: { type: "t", value: dataTexture },
                        //transferTex: {type: "t", value: transferTexture },
-                         steps : {type: "1f" , value: 20.0}, // so we know how long to make in incriment 
+                         steps : {type: "1f" , value: nSteps}, // so we know how long to make in incriment 
                          alphaCorrection : {type: "1f" , value: alphaCorrection }}
     });
     materialSecondPass.transparent = true;
-    materialSecondPass.blending = "NormalBlending";
-
+    
     sceneSecondPass = new THREE.Scene();
     var meshSecondPass = new THREE.Mesh( boxGeometry, materialSecondPass );
     sceneSecondPass.add( meshSecondPass );  
 
     /*************** Scene etc ************/
-    renderer = new THREE.WebGLRenderer( {alpha: true} );
+    renderer = new THREE.WebGLRenderer( { antialias: true} );
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor( "rgb(135, 206, 250)", 1);
+    renderer.sortObjects = true;
 
     document.body.appendChild(renderer.domElement);
 
@@ -107,8 +108,6 @@ function update() {
 
 
 function render() {
-    var delta = clock.getDelta();
-    //controls.update(delta);
     controls.update();
     //Render first pass and store the world space coords of the back face fragments into the texture.
     renderer.render( sceneFirstPass, camera, firstPassTexture, true);
