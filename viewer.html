@@ -116,7 +116,7 @@
 		    dataSample = sampleAs3DTexture(dataTexture, currentPosition);
 	      
 		    //Allow the alpha correction customization
-		    alphaSample = dataSample.a * alphaCorrection;
+		    alphaSample = dataSample.a * 0.;
 
 		    //Perform the composition.
 		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample;

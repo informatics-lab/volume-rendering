@@ -74,6 +74,12 @@ function initVis() {
   /*  var directionalLight = new THREE.DirectionalLight(0xffff55, 1);
     directionalLight.position.set(-600, 300, -600);
     scene.add(directionalLight);*/
+
+    var anotherBoxGeometry = new THREE.BoxGeometry(3, 3, 3);
+    var anotherMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
+    var anotherBoxMesh = new THREE.Mesh( anotherBoxGeometry, anotherMaterial );
+    sceneSecondPass.add(anotherBoxMesh);
+    anotherBoxMesh.position = new THREE.Vector3( 2., 2., 2.);
 }
 
 
