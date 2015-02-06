@@ -1,8 +1,8 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
 var meshFirstPass;
 
-var alphaCorrection = 1.0;
-var tex
+var alphaCorrection = 0.02; // just a fudge factor
+var nSteps = 500;
 
 initVis();
 animate();
@@ -11,7 +11,7 @@ function initVis() {
     clock = new THREE.Clock();
     
     /*** Camera ***/
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 1000);
     camera.position.set(-1.73, 0.13, 0.9)
 
     /***************** Data Cloud **********************/
@@ -52,16 +52,17 @@ function initVis() {
         uniforms: { firstPassTexture: { type: "t", value: firstPassTexture },
                          dataTexture: { type: "t", value: dataTexture },
                        //transferTex: {type: "t", value: transferTexture },
-                         steps : {type: "1f" , value: 20.0}, // so we know how long to make in incriment 
+                         steps : {type: "1f" , value: nSteps}, // so we know how long to make in incriment 
                          alphaCorrection : {type: "1f" , value: alphaCorrection }}
     });
-
+    materialSecondPass.transparent = true;
+    
     sceneSecondPass = new THREE.Scene();
     var meshSecondPass = new THREE.Mesh( boxGeometry, materialSecondPass );
     sceneSecondPass.add( meshSecondPass );  
 
     /*************** Scene etc ************/
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer( { antialias: true} );
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor( "rgb(135, 206, 250)", 1);
 
@@ -105,8 +106,6 @@ function update() {
 
 
 function render() {
-    var delta = clock.getDelta();
-    //controls.update(delta);
     controls.update();
     //Render first pass and store the world space coords of the back face fragments into the texture.
     renderer.render( sceneFirstPass, camera, firstPassTexture, true);
