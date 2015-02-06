@@ -18,6 +18,8 @@ function initVis() {
     // load texture
     dataTexture = THREE.ImageUtils.loadTexture('test_data_rgba.png');
 
+    var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
+    boxGeometry.doubleSided = true;
 
     /*** first pass ***/
 	var materialFirstPass = new THREE.ShaderMaterial( {
@@ -26,12 +28,9 @@ function initVis() {
         side: THREE.BackSide
     });
 
-    sceneFirstPass = new THREE.Scene();
-
-    var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
-    boxGeometry.doubleSided = true;
-  
     meshFirstPass = new THREE.Mesh( boxGeometry, materialFirstPass );
+    
+    sceneFirstPass = new THREE.Scene();
     sceneFirstPass.add( meshFirstPass );
 
 
@@ -42,6 +41,8 @@ function initVis() {
                                                magFilter: THREE.NearestFilter,
                                                format: THREE.RGBFormat,
                                                type: THREE.FloatType } );
+
+    firstPassTexture.wrapS = firstPassTexture.wrapT = THREE.ClampToEdgeWrapping;    
     
     /*** second pass ***/
     materialSecondPass = new THREE.ShaderMaterial( {
@@ -49,10 +50,10 @@ function initVis() {
         fragmentShader: document.getElementById( 'fragmentShaderSecondPass' ).textContent,
         side: THREE.FrontSide,
         uniforms: { firstPassTexture: { type: "t", value: firstPassTexture },
-        dataTexture: { type: "t", value: dataTexture },
-        //transferTex: { type: "t", value: transferTexture },
-        steps : {type: "1f" , value: 20.0}, // so we know how long to make in incriment 
-        alphaCorrection : {type: "1f" , value: alphaCorrection }}
+                         dataTexture: { type: "t", value: dataTexture },
+                       //transferTex: {type: "t", value: transferTexture },
+                         steps : {type: "1f" , value: 20.0}, // so we know how long to make in incriment 
+                         alphaCorrection : {type: "1f" , value: alphaCorrection }}
     });
 
     sceneSecondPass = new THREE.Scene();
@@ -92,7 +93,7 @@ function render() {
     var delta = clock.getDelta();
     controls.update(delta);
     //Render first pass and store the world space coords of the back face fragments into the texture.
-    renderer.render( sceneFirstPass, camera);
+    renderer.render( sceneFirstPass, camera, firstPassTexture, true);
     //Render the second pass and perform the volume rendering.
     renderer.render( sceneSecondPass, camera );
 }

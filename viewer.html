@@ -38,7 +38,7 @@
 	
 	void main()
 	{
-		worldSpaceCoords = (modelMatrix * vec4(position + vec3(0.5, 0.5,0.5), 1.0 )).xyz;
+		worldSpaceCoords = (modelMatrix * vec4(position + vec3(0.5, 0.5, 0.5), 1.0 )).xyz;
 		gl_Position = projectionMatrix *  modelViewMatrix * vec4( position, 1.0 );
 		projectedCoords =  projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 	}
@@ -131,7 +131,7 @@
 				      
 		    //If the length traversed is more than the ray length, or if the alpha accumulated reaches 1.0 then exit.
 		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 )
-				break;
+					break;
 	    }
 	    gl_FragColor = accumulatedColor;
     }
