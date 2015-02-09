@@ -95,7 +95,7 @@
 	    vec3 currentPosition = frontPos;
 	
 	    //The color accumulator.
-	    vec4 accumulatedColor = vec4(0.0);
+	    vec3 accumulatedColor = vec3(0.0);
 	
 	    //The alpha value accumulated so far.
 	    float accumulatedAlpha = 0.0;
@@ -117,7 +117,7 @@
 		    alphaSample = dataSample.a;
 
 		    //Perform the composition.
-		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample * alphaSample;
+		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample.xyz * alphaSample;
 			//accumulatedColor += dataSample;
 
 		    //Store the alpha accumulated so far.
@@ -131,7 +131,8 @@
 		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 )
 				break;
 	    }
-	    gl_FragColor = accumulatedColor;
+	    vec4 fragColor = vec4(accumulatedColor.x, accumulatedColor.y, accumulatedColor.z, accumulatedAlpha);
+	    gl_FragColor = fragColor;
     }
 
 </script>
