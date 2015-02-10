@@ -49,9 +49,15 @@
     uniform sampler2D firstPassTexture, dataTexture; //i.e. tex and cubeTex
     uniform float steps;
     uniform float alphaCorrection;
+
     const int MAX_STEPS = 512;
     
-    vec3 dataDims = vec3(4, 4, 4);
+    vec3 dataDims = vec3(4, 4, 4); // really this should be passed not hard coded
+
+    vec3 colorData(float value) {
+    	vec3 color = vec3(255, 255, 255);
+    	return color;
+    }
  
     vec4 sampleAs3DTexture(sampler2D tex, vec3 pos) {
     	// pos is in UV coords i.e. 0->1. We also want to interrogate out texture in the range 0->1
@@ -62,7 +68,9 @@
     	float q = pos.z;
 
         lowp vec4 sample = texture2D(tex, vec2(p, q)); //I think this fn might convert from 255 range to 0->1 range
-    	vec4 returnSample = vec4(255, 255, 255, sample.x * alphaCorrection); // alpha is 255 in png so overwrite
+        float datum = sample;
+        vec3 color = colorData(datum);
+    	vec4 returnSample = vec4(color.xyz, sample.x * alphaCorrection); // alpha is 255 in png so overwrite
         return returnSample;
     }
 
