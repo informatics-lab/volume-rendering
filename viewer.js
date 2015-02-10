@@ -16,7 +16,7 @@ function initVis() {
 
     /***************** Data Cloud **********************/
     // load texture
-    dataTexture = THREE.ImageUtils.loadTexture('test_data_rgba.png');
+    dataTexture = THREE.ImageUtils.loadTexture('test_data_greyscale_centre.png');
 
     var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
     boxGeometry.doubleSided = true;
