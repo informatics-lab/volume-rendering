@@ -1,7 +1,7 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
 var meshFirstPass;
 
-var alphaCorrection = 0.02; // just a fudge factor
+var alphaCorrection = 0.05; // just a fudge factor
 var nSteps = 500;
 
 initVis();
@@ -16,7 +16,7 @@ function initVis() {
 
     /***************** Data Cloud **********************/
     // load texture
-    dataTexture = THREE.ImageUtils.loadTexture('test_data_greyscale_centre.png');
+    dataTexture = THREE.ImageUtils.loadTexture('./test_blob.png');
 
     var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
     boxGeometry.doubleSided = true;
@@ -33,7 +33,7 @@ function initVis() {
     sceneFirstPass = new THREE.Scene();
     sceneFirstPass.add( meshFirstPass );
 
-
+    
     // get the "colour" coords we just made, as a texture
     firstPassTexture = new THREE.WebGLRenderTarget(  window.innerWidth,
                                              window.innerHeight,

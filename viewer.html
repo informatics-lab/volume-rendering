@@ -52,26 +52,66 @@
 
     const int MAX_STEPS = 512;
     
-    vec3 dataDims = vec3(4, 4, 4); // really this should be passed not hard coded
+    const vec3 dataShape = vec3(128, 128, 16); // really this should be passed not hard coded
+    const vec2 textureShape = vec2(256, 256);
 
-    vec3 colorData(float value) {
+    vec3 getDatumColor(float datum) {
     	vec3 color = vec3(255, 255, 255);
+    	if (datum == 9999.9999){
+    		color = vec3(255, 0, 0);
+    	}
     	return color;
     }
- 
-    vec4 sampleAs3DTexture(sampler2D tex, vec3 pos) {
-    	// pos is in UV coords i.e. 0->1. We also want to interrogate out texture in the range 0->1
-    	// however, our 3D dimensions are conceptually 4,4,4
-    	float nTiles = dataDims.z;
-    	float tileWidth = 1.0 / nTiles;
-    	float p = pos.y * tileWidth + pos.x / nTiles;
-    	float q = pos.z;
 
-        lowp vec4 sample = texture2D(tex, vec2(p, q)); //I think this fn might convert from 255 range to 0->1 range
-        float datum = sample;
-        vec3 color = colorData(datum);
-    	vec4 returnSample = vec4(color.xyz, sample.x * alphaCorrection); // alpha is 255 in png so overwrite
-        return returnSample;
+    float getDatumAlpha(float datum) {
+    	return datum * alphaCorrection;
+    }
+ 
+    float sampleAs3DTexture(sampler2D tex, vec3 pos, vec3 dataShape, vec2 texShape) {
+    	/* 
+		A function to reference a 2D RGBA texture which contains tiles 3D array data.
+
+		Tiling goes column, row, channel
+
+		Args:
+			* tex: texture of tiled data
+			* pos: position of the datum
+			* dataShape: the x,y,z shape of the data which has been tiled
+			* texShape: the x,y dims of the tiles texture
+    	*/
+    	vec2 nTiles = texShape.xy / dataShape.xy;
+    	float tilesPerLayer = nTiles.x * nTiles.y;
+
+    	vec2 tileDim = vec2(1.0, 1.0) / nTiles;
+    	float thisTileN = floor((dataShape.z-1.0) * pos.z);
+
+    	float zTile = floor(thisTileN/tilesPerLayer);
+    	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x)	;
+    	float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
+    	vec3 thisTile = vec3(xTile, yTile, zTile);
+
+    	vec2 thisPoint = (thisTile.xy+pos.xy) * tileDim;
+
+    	float datum;
+    	if (thisTile.z == 0.0){
+    		datum = texture2D(tex, thisPoint).r;
+    	}else if (thisTile.z == 1.0){
+ 			datum = texture2D(tex, thisPoint).g;
+    	}else if (thisTile.z == 2.0){
+    		datum = texture2D(tex, thisPoint).b;
+    	}else if (thisTile.z == 3.0){
+			datum = texture2D(tex, thisPoint).a;
+    	}
+  
+ 	  	return datum;
+    }
+
+    vec4 getRGBAfromDataTex(sampler2D tex, vec3 pos, vec3 dataShape, vec2 texShape){
+    	float datum = sampleAs3DTexture(tex, pos, dataShape, texShape);
+    	vec3 color = getDatumColor(datum);
+    	float alpha = getDatumAlpha(datum);
+
+    	return vec4(color.xyz, alpha);
     }
 
     // max 2d size is 4096 x 4096
@@ -119,7 +159,7 @@
 	    //Perform the ray marching iterations
 	    for(int i = 0; i < MAX_STEPS; i++){
 		    //Get the voxel intensity value from the 3D texture.	
-		    dataSample = sampleAs3DTexture(dataTexture, currentPosition);
+		    dataSample = getRGBAfromDataTex(dataTexture, currentPosition, dataShape, textureShape);
 
 		    //Perform the composition.
 		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample.xyz * dataSample.a;
