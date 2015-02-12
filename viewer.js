@@ -16,7 +16,7 @@ function initVis() {
 
     /***************** Data Cloud **********************/
     // load texture
-    dataTexture = THREE.ImageUtils.loadTexture('test_data_greyscale_centre.png');
+    dataTexture = THREE.ImageUtils.loadTexture('test_multichannel.png');
 
     var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
     boxGeometry.doubleSided = true;
@@ -33,7 +33,7 @@ function initVis() {
     sceneFirstPass = new THREE.Scene();
     sceneFirstPass.add( meshFirstPass );
 
-
+    
     // get the "colour" coords we just made, as a texture
     firstPassTexture = new THREE.WebGLRenderTarget(  window.innerWidth,
                                              window.innerHeight,

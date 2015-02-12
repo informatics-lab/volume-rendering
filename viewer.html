@@ -75,20 +75,20 @@
 			* dataShape: the x,y,z shape of the data which has been tiled
 			* texShape: the x,y dims of the tiles texture
     	*/
-    	int maxTiles = Vec2(texShape.x / dataShape.x, texShape.y / dataShape.y);
-    	int thisTileN = pos.z;
-    	int tilesPerLayer = maxTiles.x * maxTiles.y;
-    	int zTile = floor(thisTileN/tilesPerLayer);
-    	int yTile = floor((thisTileN - (zTile * tilesPerLayer)) / maxTiles.x);
-    	int xTile = mod((thisTileN - (zTile * tilesPerLayer)), maxTiles.x);
-    	int thisTile = Vec3(xTile, yTile, zTile);
+    	vec2 maxTiles = vec2(texShape.x / dataShape.x, texShape.y / dataShape.y);
+    	float thisTileN = pos.z;
+    	float tilesPerLayer = maxTiles.x * maxTiles.y;
+    	float zTile = floor(thisTileN/tilesPerLayer);
+    	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / maxTiles.x);
+    	float xTile = mod((thisTileN - (zTile * tilesPerLayer)), maxTiles.x);
+    	vec3 thisTile = vec3(xTile, yTile, zTile);
 
     	float datum;
     	switch(thisTile.z){
-    		case 0: datum = texture2D(tex, vec2(thisTile.x, thisTile.y)).r;
-    		case 1: datum = texture2D(tex, vec2(thisTile.x, thisTile.y)).g;
-    		case 2: datum = texture2D(tex, vec2(thisTile.x, thisTile.y)).b;
-    		case 3: datum = texture2D(tex, vec2(thisTile.x, thisTile.y)).a;
+    		case 0.0: datum = texture2D(tex, vec2(thisTile.x, thisTile.y)).r; break;
+    		case 1.0: datum = texture2D(tex, vec2(thisTile.x, thisTile.y)).g; break;
+    		case 2.0: datum = texture2D(tex, vec2(thisTile.x, thisTile.y)).b; break;
+    		case 3.0: datum = texture2D(tex, vec2(thisTile.x, thisTile.y)).a; break;
     	}
 
     	return datum;
