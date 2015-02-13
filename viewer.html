@@ -52,8 +52,8 @@
 
     const int MAX_STEPS = 512;
     
-    vec3 dataShape = vec3(128, 128, 16); // really this should be passed not hard coded
-    vec2 textureShape = vec2(256, 256);
+    const vec3 dataShape = vec3(128, 128, 16); // really this should be passed not hard coded
+    const vec2 textureShape = vec2(256, 256);
 
     vec3 getDatumColor(float datum) {
     	vec3 color = vec3(255, 255, 255);
@@ -76,14 +76,15 @@
 			* dataShape: the x,y,z shape of the data which has been tiled
 			* texShape: the x,y dims of the tiles texture
     	*/
-    	vec2 nTiles = vec2(texShape.x / dataShape.x, texShape.y / dataShape.y);
-    	vec2 tileDim = vec2(1.0, 1.0) / nTiles;
-    	float thisTileN = (dataShape.z / pos.z);
+    	vec2 nTiles = texShape.xy / dataShape.xy;
     	float tilesPerLayer = nTiles.x * nTiles.y;
 
-    	float zTile = floor(thisTileN/tilesPerLayer) - 1.0;
-    	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x) - 1.0;
-    	float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x) - 1.0;
+    	vec2 tileDim = vec2(1.0, 1.0) / nTiles;
+    	float thisTileN = floor(dataShape.z * pos.z);
+
+    	float zTile = floor(thisTileN/tilesPerLayer);
+    	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x)	;
+    	float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
     	vec3 thisTile = vec3(xTile, yTile, zTile);
 
     	vec2 thisPoint = (thisTile.xy+pos.xy) * tileDim;
@@ -98,10 +99,8 @@
     	}else if (thisTile.z == 3.0){
 			datum = texture2D(tex, thisPoint).a;
     	}
-
-    	datum = 0.00000000002
-
-    	return datum;
+  
+ 	  	return datum;
     }
 
     vec4 getRGBAfromDataTex(sampler2D tex, vec3 pos, vec3 dataShape, vec2 texShape){
