@@ -52,7 +52,7 @@
 
     const int MAX_STEPS = 512;
     
-    const vec3 dataShape = vec3(128, 128, 16); // really this should be passed not hard coded
+    const vec3 dataShape = vec3(32, 32, 32); // really this should be passed not hard coded
     const vec2 textureShape = vec2(256, 256);
 
     vec3 getDatumColor(float datum) {
@@ -79,6 +79,7 @@
 			* dataShape: the x,y,z shape of the data which has been tiled
 			* texShape: the x,y dims of the tiles texture
     	*/
+
     	vec2 nTiles = texShape.xy / dataShape.xy;
     	float tilesPerLayer = nTiles.x * nTiles.y;
 
@@ -86,23 +87,23 @@
     	float thisTileN = floor((dataShape.z-1.0) * pos.z);
 
     	float zTile = floor(thisTileN/tilesPerLayer);
-    	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x)	;
+    	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
     	float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
     	vec3 thisTile = vec3(xTile, yTile, zTile);
 
     	vec2 thisPoint = (thisTile.xy+pos.xy) * tileDim;
 
-    	float datum;
-    	if (thisTile.z == 0.0){
+		float datum;
+     	if (thisTile.z == 0.0){
     		datum = texture2D(tex, thisPoint).r;
     	}else if (thisTile.z == 1.0){
  			datum = texture2D(tex, thisPoint).g;
     	}else if (thisTile.z == 2.0){
     		datum = texture2D(tex, thisPoint).b;
-    	}else if (thisTile.z == 3.0){
-			datum = texture2D(tex, thisPoint).a;
+    	}else{
+    		datum = 9999.9999;
     	}
-  
+
  	  	return datum;
     }
 
