@@ -1,7 +1,7 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
 var meshFirstPass;
 
-var alphaCorrection = 0.02; // just a fudge factor
+var alphaCorrection = 0.003; // just a fudge factor
 var nSteps = 500;
 
 initVis();

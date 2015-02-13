@@ -77,16 +77,16 @@
 			* texShape: the x,y dims of the tiles texture
     	*/
     	vec2 nTiles = vec2(texShape.x / dataShape.x, texShape.y / dataShape.y);
-    	vec2 tileWidth = vec2(1.0, 1.0) / nTiles;
-    	float thisTileN = pos.z;
+    	vec2 tileDim = vec2(1.0, 1.0) / nTiles;
+    	float thisTileN = (dataShape.z / pos.z);
     	float tilesPerLayer = nTiles.x * nTiles.y;
 
-    	float zTile = floor(thisTileN/tilesPerLayer);
-    	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
-    	float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
+    	float zTile = floor(thisTileN/tilesPerLayer) - 1.0;
+    	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x) - 1.0;
+    	float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x) - 1.0;
     	vec3 thisTile = vec3(xTile, yTile, zTile);
 
-    	vec2 thisPoint = (thisTile.xy+pos.xy) * tileWidth;
+    	vec2 thisPoint = (thisTile.xy+pos.xy) * tileDim;
 
     	float datum;
     	if (thisTile.z == 0.0){
