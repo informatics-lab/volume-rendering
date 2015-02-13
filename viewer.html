@@ -57,6 +57,9 @@
 
     vec3 getDatumColor(float datum) {
     	vec3 color = vec3(255, 255, 255);
+    	if (datum == 9999.9999){
+    		color = vec3(255, 0, 0);
+    	}
     	return color;
     }
 
@@ -80,7 +83,7 @@
     	float tilesPerLayer = nTiles.x * nTiles.y;
 
     	vec2 tileDim = vec2(1.0, 1.0) / nTiles;
-    	float thisTileN = floor(dataShape.z * pos.z);
+    	float thisTileN = floor((dataShape.z-1.0) * pos.z);
 
     	float zTile = floor(thisTileN/tilesPerLayer);
     	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x)	;
