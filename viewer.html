@@ -51,19 +51,20 @@
     uniform float alphaCorrection;
 
     const int MAX_STEPS = 512;
+    ivec2 textureShape = textureSize(dataTexture);
     
-    vec3 shape = vec3(4, 4, 4); // really this should be passed not hard coded
+    vec3 dataShape = vec3(4, 4, 4); // really this should be passed not hard coded
 
     vec3 getDatumColor(float datum) {
     	vec3 color = vec3(255, 255, 255);
     	return color;
     }
 
-    vec3 getDatumAlpha(float datum) {
+    float getDatumAlpha(float datum) {
     	return datum * alphaCorrection;
     }
  
-    vec4 sampleAs3DTexture(sampler2D tex, vec3 pos, vec3 dataShape, vec2 texShape) {
+    float sampleAs3DTexture(sampler2D tex, vec3 pos, vec3 dataShape, vec2 texShape) {
     	/* 
 		A function to reference a 2D RGBA texture which contains tiles 3D array data.
 
@@ -84,11 +85,14 @@
     	vec3 thisTile = vec3(xTile, yTile, zTile);
 
     	float datum;
-    	switch(thisTile.z){
-    		case 0.0: datum = texture2D(tex, vec2(thisTile.x, thisTile.y)).r; break;
-    		case 1.0: datum = texture2D(tex, vec2(thisTile.x, thisTile.y)).g; break;
-    		case 2.0: datum = texture2D(tex, vec2(thisTile.x, thisTile.y)).b; break;
-    		case 3.0: datum = texture2D(tex, vec2(thisTile.x, thisTile.y)).a; break;
+    	if (thisTile.z == 0.0){
+    		texture2D(tex, vec2(thisTile.x, thisTile.y)).r;
+    	}else if (thisTile.z == 1.0){
+ 			texture2D(tex, vec2(thisTile.x, thisTile.y)).g;
+    	}else if (thisTile.z == 2.0){
+    		texture2D(tex, vec2(thisTile.x, thisTile.y)).b;
+    	}else if (thisTile.z == 3.0){
+			texture2D(tex, vec2(thisTile.x, thisTile.y)).a;
     	}
 
     	return datum;
@@ -147,7 +151,7 @@
 	    //Perform the ray marching iterations
 	    for(int i = 0; i < MAX_STEPS; i++){
 		    //Get the voxel intensity value from the 3D texture.	
-		    dataSample = getRGBAfromDataTex(dataTexture, currentPosition);
+		    dataSample = getRGBAfromDataTex(dataTexture, currentPosition, dataShape, textureShape);
 
 		    //Perform the composition.
 		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample.xyz * dataSample.a;
