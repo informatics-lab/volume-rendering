@@ -82,17 +82,19 @@
     	float zTile = floor(thisTileN/tilesPerLayer);
     	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / maxTiles.x);
     	float xTile = mod((thisTileN - (zTile * tilesPerLayer)), maxTiles.x);
+
     	vec3 thisTile = vec3(xTile, yTile, zTile);
+    	vec2 thisPoint = vec2((thisTile.x+pos.x) * dataShape.x, (thisTile.y+pos.y) * dataShape.y);
 
     	float datum;
     	if (thisTile.z == 0.0){
-    		texture2D(tex, vec2(thisTile.x, thisTile.y)).r;
+    		datum = texture2D(tex, thisPoint).r;
     	}else if (thisTile.z == 1.0){
- 			texture2D(tex, vec2(thisTile.x, thisTile.y)).g;
+ 			datum = texture2D(tex, thisPoint).g;
     	}else if (thisTile.z == 2.0){
-    		texture2D(tex, vec2(thisTile.x, thisTile.y)).b;
+    		datum = texture2D(tex, thisPoint).b;
     	}else if (thisTile.z == 3.0){
-			texture2D(tex, vec2(thisTile.x, thisTile.y)).a;
+			datum = texture2D(tex, thisPoint).a;
     	}
 
     	datum = 0.1;
