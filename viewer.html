@@ -51,9 +51,9 @@
     uniform float alphaCorrection;
 
     const int MAX_STEPS = 512;
-    ivec2 textureShape = textureSize(dataTexture);
     
-    vec3 dataShape = vec3(4, 4, 4); // really this should be passed not hard coded
+    vec3 dataShape = vec3(128, 128, 16); // really this should be passed not hard coded
+    vec2 textureShape = vec2(256, 256);
 
     vec3 getDatumColor(float datum) {
     	vec3 color = vec3(255, 255, 255);
@@ -94,6 +94,8 @@
     	}else if (thisTile.z == 3.0){
 			texture2D(tex, vec2(thisTile.x, thisTile.y)).a;
     	}
+
+    	datum = 0.1;
 
     	return datum;
     }
