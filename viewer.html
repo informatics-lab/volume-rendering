@@ -92,7 +92,7 @@
 
     	vec2 thisPoint = (thisTile.xy+pos.xy) * tileDim;
 
-    	float datum;
+    	float datum = 8888.8888;
     	if (thisTile.z == 0.0){
     		datum = texture2D(tex, thisPoint).r;
     	}else if (thisTile.z == 1.0){
@@ -101,8 +101,17 @@
     		datum = texture2D(tex, thisPoint).b;
     	}else if (thisTile.z == 3.0){
 			datum = texture2D(tex, thisPoint).a;
+    	}else{
+    		datum = 9999.9999;
     	}
-  
+
+    	float a = 30.0/63.0;
+    	float b = 40.0/63.0;
+
+    	if (a < pos.x && pos.x < b && a < pos.y && pos.y < b && a < pos.z && pos.z < b && datum == 0.0){
+    		datum = 9999.9999;
+    	}
+
  	  	return datum;
     }
 
