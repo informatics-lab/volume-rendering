@@ -12,11 +12,14 @@ channels.
 from __future__ import division
 import png
 
-def tile_array(a, maxx=256, maxy=256, maxz=4):
+def tile_array(a, maxx=256, maxy=256, maxz=3):
     """
     Flattens an x,y,z 3D array into an array of x,y tiles
     
     Tiling order is column, followed by row, followed by channel
+    
+    Note that png textures coordinates increase top left to
+    bottom right so we also need to take this into account.
     
     Args:
         * a (numpy array): a 3d numpy array of data
@@ -29,28 +32,24 @@ def tile_array(a, maxx=256, maxy=256, maxz=4):
     
     pngarray = np.zeros([maxx, maxy, maxz])
     datax, datay, dataz = a.shape
-    itiles = int(maxx/datax)
-    jtiles = int(maxy/datay)
-    zslice = 0
+    maxitiles = int(maxx/datax)
+    maxjtiles = int(maxy/datay)
+    tilesperlayer = maxitiles * maxjtiles
     
-    for z in range(maxz):
-        for jtile in range(jtiles):
-            for itile in range(itiles):
-                _xmin = itile*datax
-                _xmax = (itile+1)*datax
-                _ymin = jtile*datay
-                _ymax = (jtile+1)*datay
-                
-                pngarray[_xmin:_xmax, _ymin:_ymax, z] = a[:, :, zslice]
-                if z+1 == maxz and jtile+1 == jtiles and itile+1 == itiles:
-                    if zslice+1 < dataz:
-                        print "Output array satuated"
-                    return pngarray
-                elif zslice < dataz:
-                    pngarray[_xmin:_xmax, _ymin:_ymax, z] = a[:, :, zslice]
-                    zslice += 1
+    for zslice in range(dataz):
+        ztile = np.floor(zslice/tilesperlayer)
+        ytile = np.floor((zslice - (ztile * tilesperlayer)) / maxitiles)
+        xtile = np.mod(zslice - (ztile * tilesperlayer), maxitiles)
+        
+        pngarray[xtile*datax:(xtile+1)*datax,
+                 ytile*datay:(ytile+1)*datay,
+                 ztile] = a[:, :, zslice]
+        
+    pngarray = pngarray.transpose([1, 0, 2]) # swap from row major to column (or vice versa, not sure which way round this is!)
+    
+    return pngarray[::-1, ...] # revese first axis to be compatible with textures
 
-
+    
 def write_png(array, savep, height=256, width=256):
     """
     Writes a tiled array to a png image
@@ -67,15 +66,15 @@ def write_png(array, savep, height=256, width=256):
     if (height**0.5)%1 != 0.0 or (width**0.5)%1 != 0.0:
         raise ValueError("Dimensions must be square numbers i.e. sqrt(n) must be an integer")
     
-    png_writer = png.Writer(height=height, width=width, alpha='RGBA')
+    png_writer = png.Writer(height=height, width=width, bitdepth=8)
     with open(savep, 'wb') as f:
-        flat_array = array.reshape(-1, width*4) #assuming RGBA i.e. 4 channels
+        flat_array = array.reshape(-1, width*3) #assuming RGB i.e. 3 channels
         png_writer.write(f, flat_array)
     
 
 def array_to_png(data, filename, height=256, width=256):
     """ Converts a x,y,z 3D array to a tiled png image """
-    tiled_array = tile_array(data, maxx=height, maxy=width, maxz=4)
+    tiled_array = tile_array(data, maxx=height, maxy=width, maxz=3)
     write_png(tiled_array, filename, height, width)
 
 
