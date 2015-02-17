@@ -84,25 +84,43 @@
     	float tilesPerLayer = nTiles.x * nTiles.y;
 
     	vec2 tileDim = vec2(1.0, 1.0) / nTiles;
-    	float thisTileN = floor((dataShape.z-1.0) * pos.z);
 
+    	float thisTileN = floor((dataShape.z-1.0) * pos.z);
     	float zTile = floor(thisTileN/tilesPerLayer);
     	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
     	float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
-    	vec3 thisTile = vec3(xTile, yTile, zTile);
+    	
+    	vec2 thisPoint = vec2(xTile+pos.x, yTile+pos.y) * tileDim;
 
-    	vec2 thisPoint = (thisTile.xy+pos.yx) * tileDim;
-
-		float datum;
-     	if (thisTile.z == 0.0){
+    	float datum;
+    	if (zTile == 0.0){
     		datum = texture2D(tex, thisPoint).r;
-    	}else if (thisTile.z == 1.0){
+    	}else if (zTile == 1.0){
  			datum = texture2D(tex, thisPoint).g;
-    	}else if (thisTile.z == 2.0){
+    	}else if (zTile == 2.0){
     		datum = texture2D(tex, thisPoint).b;
     	}
 
- 	  	return datum;
+
+    	float thisTileNp1 = min(thisTileN+1.0, pos.z);
+    	float zTileNp1 = floor(thisTileN/tilesPerLayer);
+    	float yTileNp1 = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
+    	float xTileNp1 = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
+    	
+    	vec2 thisPointNp1 = vec2(xTileNp1+pos.x, yTileNp1+pos.y) * tileDim;
+
+    	float datumNp1 = 8888.8888;
+    	if (zTile == 0.0){
+    		datumNp1 = texture2D(tex, thisPointNp1).r;
+    	}else if (zTileNp1 == 1.0){
+ 			datumNp1 = texture2D(tex, thisPointNp1).g;
+    	}else if (zTileNp1 == 2.0){
+    		datumNp1 = texture2D(tex, thisPointNp1).b;
+    	}
+
+    	float zDiff = mod((dataShape.z-1.0) * pos.z, 1.0);
+
+ 	  	return ((1.0 - zDiff) * datum) + (zDiff * datumNp1);
     }
 
     vec4 getRGBAfromDataTex(sampler2D tex, vec3 pos, vec3 dataShape, vec2 texShape){
