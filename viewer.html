@@ -102,10 +102,10 @@
     	}
 
 
-    	float thisTileNp1 = min(thisTileN+1.0, dataShape.z);
-    	float zTileNp1 = floor(thisTileN/tilesPerLayer);
-    	float yTileNp1 = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
-    	float xTileNp1 = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
+    	float thisTileNp1 = min(thisTileN+1.0, dataShape.z-1.0);
+    	float zTileNp1 = floor(thisTileNp1/tilesPerLayer);
+    	float yTileNp1 = floor((thisTileNp1 - (zTile * tilesPerLayer)) / nTiles.x);
+    	float xTileNp1 = mod((thisTileNp1 - (zTile * tilesPerLayer)), nTiles.x);
     	
     	vec2 thisPointNp1 = vec2(xTileNp1+pos.x, yTileNp1+pos.y) * tileDim;
 
