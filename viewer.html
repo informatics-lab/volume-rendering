@@ -86,7 +86,7 @@
     	float thisTileN = floor((dataShape.z-1.0) * pos.z);
 
     	float zTile = floor(thisTileN/tilesPerLayer);
-    	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x)	;
+    	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
     	float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
     	vec3 thisTile = vec3(xTile, yTile, zTile);
 
@@ -101,15 +101,6 @@
     		datum = texture2D(tex, thisPoint).b;
     	}else if (thisTile.z == 3.0){
 			datum = texture2D(tex, thisPoint).a;
-    	}else{
-    		datum = 9999.9999;
-    	}
-
-    	float a = 30.0/63.0;
-    	float b = 40.0/63.0;
-
-    	if (a < pos.x && pos.x < b && a < pos.y && pos.y < b && a < pos.z && pos.z < b && datum == 0.0){
-    		datum = 9999.9999;
     	}
 
  	  	return datum;
