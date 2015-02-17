@@ -102,14 +102,14 @@
     	}
 
 
-    	float thisTileNp1 = min(thisTileN+1.0, pos.z);
+    	float thisTileNp1 = min(thisTileN+1.0, dataShape.z);
     	float zTileNp1 = floor(thisTileN/tilesPerLayer);
     	float yTileNp1 = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
     	float xTileNp1 = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
     	
     	vec2 thisPointNp1 = vec2(xTileNp1+pos.x, yTileNp1+pos.y) * tileDim;
 
-    	float datumNp1 = 8888.8888;
+    	float datumNp1;
     	if (zTile == 0.0){
     		datumNp1 = texture2D(tex, thisPointNp1).r;
     	}else if (zTileNp1 == 1.0){
