@@ -91,7 +91,7 @@
     	float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
     	vec3 thisTile = vec3(xTile, yTile, zTile);
 
-    	vec2 thisPoint = (thisTile.xy+pos.xy) * tileDim;
+    	vec2 thisPoint = (thisTile.xy+pos.yx) * tileDim;
 
 		float datum;
      	if (thisTile.z == 0.0){
@@ -100,8 +100,6 @@
  			datum = texture2D(tex, thisPoint).g;
     	}else if (thisTile.z == 2.0){
     		datum = texture2D(tex, thisPoint).b;
-    	}else{
-    		datum = 9999.9999;
     	}
 
  	  	return datum;
