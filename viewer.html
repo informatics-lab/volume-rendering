@@ -52,8 +52,8 @@
 
     const int MAX_STEPS = 512;
     
-    const vec3 dataShape = vec3(32, 32, 32); // really this should be passed not hard coded
-    const vec2 textureShape = vec2(256, 256);
+    const vec3 dataShape = vec3(99, 93, 330); // really this should be passed not hard coded
+    const vec2 textureShape = vec2(1024, 1024);
 
     vec3 getDatumColor(float datum) {
     	vec3 color = vec3(255, 255, 255);
@@ -65,6 +65,25 @@
 
     float getDatumAlpha(float datum) {
     	return datum * alphaCorrection;
+    }
+
+    float getDatum(sampler2D tex, vec3 pos, vec3 dataShape, vec2 nTiles, float tilesPerLayer, vec2 tileDim, float thisTileN){
+        float zTile = floor(thisTileN/tilesPerLayer);
+        float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
+        float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
+        
+        vec2 thisPoint = vec2(xTile+pos.x, yTile+pos.y) * tileDim;
+
+        float datum;
+        if (zTile == 0.0){
+            datum = texture2D(tex, thisPoint).r;
+        }else if (zTile == 1.0){
+            datum = texture2D(tex, thisPoint).g;
+        }else if (zTile == 2.0){
+            datum = texture2D(tex, thisPoint).b;
+        }
+
+        return datum;
     }
  
     float sampleAs3DTexture(sampler2D tex, vec3 pos, vec3 dataShape, vec2 texShape) {
@@ -80,29 +99,19 @@
 			* texShape: the x,y dims of the tiles texture
     	*/
 
-    	vec2 nTiles = texShape.xy / dataShape.xy;
-    	float tilesPerLayer = nTiles.x * nTiles.y;
+        vec2 fracNTiles = texShape.xy / dataShape.xy;
+        vec2 nTiles = vec2(floor(fracNTiles.x), floor(fracNTiles.y));
+        float tilesPerLayer = nTiles.x * nTiles.y;
+        vec2 tileDim = vec2(1.0, 1.0) / fracNTiles;
+        float thisTileN = floor((dataShape.z-1.0) * pos.z);
+        float thisTileNp1 = min(thisTileN+1.0, dataShape.z);
 
-    	vec2 tileDim = vec2(1.0, 1.0) / nTiles;
-    	float thisTileN = floor((dataShape.z-1.0) * pos.z);
+    	float datumN = getDatum(tex, pos, dataShape, nTiles, tilesPerLayer, tileDim, thisTileN);
+        float datumNp1 = getDatum(tex, pos, dataShape, nTiles, tilesPerLayer, tileDim, thisTileNp1);
 
-    	float zTile = floor(thisTileN/tilesPerLayer);
-    	float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
-    	float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
-    	vec3 thisTile = vec3(xTile, yTile, zTile);
+    	float zDiff = mod((dataShape.z-1.0) * pos.z, 1.0);
 
-    	vec2 thisPoint = (thisTile.xy+pos.yx) * tileDim;
-
-		float datum;
-     	if (thisTile.z == 0.0){
-    		datum = texture2D(tex, thisPoint).r;
-    	}else if (thisTile.z == 1.0){
- 			datum = texture2D(tex, thisPoint).g;
-    	}else if (thisTile.z == 2.0){
-    		datum = texture2D(tex, thisPoint).b;
-    	}
-
- 	  	return datum;
+ 	  	return ((1.0 - zDiff) * datumN) + (zDiff * datumNp1);
     }
 
     vec4 getRGBAfromDataTex(sampler2D tex, vec3 pos, vec3 dataShape, vec2 texShape){
