@@ -50,10 +50,11 @@
     uniform float steps;
     uniform float alphaCorrection;
 
+
     const int MAX_STEPS = 512;
     
-    const vec3 dataShape = vec3(32, 32, 32); // really this should be passed not hard coded
-    const vec2 textureShape = vec2(256, 256);
+    const vec3 dataShape = vec3(99, 93, 330); // really this should be passed not hard coded
+    const vec2 textureShape = vec2(1024, 1024);
 
     vec3 getDatumColor(float datum) {
     	vec3 color = vec3(255, 255, 255);
@@ -99,9 +100,10 @@
 			* texShape: the x,y dims of the tiles texture
     	*/
 
-        vec2 nTiles = texShape.xy / dataShape.xy;
+        vec2 fracNTiles = texShape.xy / dataShape.xy;
+        vec2 nTiles = vec2(floor(fracNTiles.x), floor(fracNTiles.y));
         float tilesPerLayer = nTiles.x * nTiles.y;
-        vec2 tileDim = vec2(1.0, 1.0) / nTiles;
+        vec2 tileDim = vec2(1.0, 1.0) / fracNTiles;
         float thisTileN = floor((dataShape.z-1.0) * pos.z);
         float thisTileNp1 = min(thisTileN+1.0, dataShape.z);
 
@@ -180,8 +182,13 @@
 		    accumulatedLength += deltaDirectionLength;
 				      
 		    //If the length traversed is more than the ray length, or if the alpha accumulated reaches 1.0 then exit.
-		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 )
+		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 ){
+		    	if (accumulatedLength >= rayLength)
+		    		accumulatedColor = vec3(255, 0, 0);
+		    	if (accumulatedAlpha >= 1.0)
+		    		accumulatedColor = vec3(0, 255, 0);
 				break;
+			}
 	    }
 	    vec4 fragColor = vec4(accumulatedColor.x, accumulatedColor.y, accumulatedColor.z, accumulatedAlpha);
 	    gl_FragColor = fragColor;
