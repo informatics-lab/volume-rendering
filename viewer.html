@@ -183,10 +183,6 @@
 				      
 		    //If the length traversed is more than the ray length, or if the alpha accumulated reaches 1.0 then exit.
 		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 ){
-		    	if (accumulatedLength >= rayLength)
-		    		accumulatedColor = vec3(255, 0, 0);
-		    	if (accumulatedAlpha >= 1.0)
-		    		accumulatedColor = vec3(0, 255, 0);
 				break;
 			}
 	    }

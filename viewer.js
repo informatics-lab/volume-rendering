@@ -4,6 +4,12 @@ var meshFirstPass;
 var alphaCorrection = 0.08; // just a fudge factor
 var nSteps = 500;
 
+var fps = 30;
+var now;
+var then = Date.now();
+var interval = 1000/fps;
+var delta;
+
 initVis();
 animate();
 
@@ -95,8 +101,17 @@ function initVis() {
 
 function animate() {
     requestAnimationFrame(animate);
-    update();
-    render();
+
+    now = Date.now();
+    delta = now - then;
+     
+    if (delta > interval) {
+        // update time stuffs
+        then = now - (delta % interval);
+         
+        update();
+        render();
+    }
 }
 
 
