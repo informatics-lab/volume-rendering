@@ -52,8 +52,8 @@
 
     const int MAX_STEPS = 512;
     
-    const vec3 dataShape = vec3(64, 64, 48); // really this should be passed not hard coded
-    const vec2 textureShape = vec2(256, 256);
+    const vec3 dataShape = vec3(99, 93, 330); // really this should be passed not hard coded
+    const vec2 textureShape = vec2(1024, 1024);
 
     vec3 getDatumColor(float datum) {
     	vec3 color = vec3(255, 255, 255);
@@ -99,9 +99,10 @@
 			* texShape: the x,y dims of the tiles texture
     	*/
 
-        vec2 nTiles = texShape.xy / dataShape.xy;
+        vec2 fracNTiles = texShape.xy / dataShape.xy;
+        vec2 nTiles = vec2(floor(fracNTiles.x), floor(fracNTiles.y));
         float tilesPerLayer = nTiles.x * nTiles.y;
-        vec2 tileDim = vec2(1.0, 1.0) / nTiles;
+        vec2 tileDim = vec2(1.0, 1.0) / fracNTiles;
         float thisTileN = floor((dataShape.z-1.0) * pos.z);
         float thisTileNp1 = min(thisTileN+1.0, dataShape.z);
 
