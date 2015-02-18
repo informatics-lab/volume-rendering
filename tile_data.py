@@ -41,9 +41,14 @@ def tile_array(a, maxx=256, maxy=256, maxz=3):
         ytile = np.floor((zslice - (ztile * tilesperlayer)) / maxitiles)
         xtile = np.mod(zslice - (ztile * tilesperlayer), maxitiles)
         
-        pngarray[xtile*datax:(xtile+1)*datax,
-                 ytile*datay:(ytile+1)*datay,
-                 ztile] = a[:, :, zslice]
+        try:
+            pngarray[xtile*datax:(xtile+1)*datax,
+                     ytile*datay:(ytile+1)*datay,
+                     ztile] = a[:, :, zslice]
+        except IndexError:
+            print "Output array saturated at slice", zslice
+            break
+            
         
     pngarray = pngarray.transpose([1, 0, 2]) # swap from row major to column (or vice versa, not sure which way round this is!)
     
