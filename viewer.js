@@ -1,10 +1,10 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
 var meshFirstPass;
 
-var alphaCorrection = 4.5 ; // just a fudge factor
-var nSteps = 512;
+var alphaCorrection = .05 ; // just a fudge factor
+var nSteps = 64;
 
-var fps = 15;
+var fps = 10;
 var now;
 var then = Date.now();
 var interval = 1000/fps;
@@ -13,6 +13,8 @@ var delta;
 initVis();
 animate();
 
+var gLight;
+
 function initVis() {
     clock = new THREE.Clock();
     
@@ -20,9 +22,15 @@ function initVis() {
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 1000);
     camera.position.set(-1.73, 0.13, 0.9);
 
+    /*** light ***/
+    var light = new THREE.PointLight(0xFFFFFF);
+    light.position.set(0., 0., 20.);
+    light.intensity = 3;
+    gLight = light;
     /***************** Data Cloud **********************/
     // load texture
-    var file = './test_blob_32_32_48_144_144.png';
+    var file = './cloud_fraction_in_a_layer0_621_810_70_4096_4096.png';
+    // var file ="./test_blob_32_32_48_144_144.png"
     var dataTexture = THREE.ImageUtils.loadTexture(file);
 
     var dims = getDimensions(file);
@@ -45,7 +53,7 @@ function initVis() {
     
     // get the "colour" coords we just made, as a texture
     firstPassTexture = new THREE.WebGLRenderTarget(  window.innerWidth,
-                                             window.innerHeight,
+                                                     window.innerHeight,
                                              { minFilter: THREE.NearestFilter,
                                                magFilter: THREE.NearestFilter,
                                                format: THREE.RGBFormat,
@@ -60,6 +68,9 @@ function initVis() {
         side: THREE.FrontSide,
         uniforms: { firstPassTexture: { type: "t", value: firstPassTexture },
                          dataTexture: { type: "t", value: dataTexture },
+                         lightPosition: { type: "v3", value: light.position},
+                         lightColor: { type: "v3", value: {x: light.color.r, y:light.color.g, z:light.color.b}},
+                         lightIntensity: {type: "1f", value: light.intensity},
                          steps : {type: "1f" , value: nSteps}, // so we know how long to make in incriment 
                          alphaCorrection : {type: "1f" , value: alphaCorrection },
                          dataShape: {type: "v3", value: dims.datashape},
@@ -74,10 +85,13 @@ function initVis() {
 
     /*************** Scene etc ************/
     renderer = new THREE.WebGLRenderer( { antialias: true} );
-    renderer.setSize(window.innerWidth, window.innerHeight); // reducing these values effectively reduced resolution
+    renderer.setSize(window.innerWidth/3, window.innerHeight/3); // reducing these values effectively reduced resolution
     renderer.setClearColor( "rgb(135, 206, 250)", 1);
 
     document.body.appendChild(renderer.domElement);
+
+    // add light
+    sceneSecondPass.add(light);
 
     // trackball controls
     controls = new THREE.TrackballControls(camera, renderer.domElement);
@@ -92,7 +106,7 @@ function initVis() {
     var anotherBoxGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
     var anotherMaterial = new THREE.MeshLambertMaterial( { color: 0xff0000, wireframe: false } );
     var anotherBoxMesh = new THREE.Mesh( anotherBoxGeometry, anotherMaterial );
-    anotherBoxMesh.position.set(.2, .2, .2);
+    anotherBoxMesh.position.set(.0, .6, .6);
     sceneSecondPass.add(anotherBoxMesh);
 }
 
