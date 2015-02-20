@@ -13,9 +13,14 @@
 
 <script id="vertexShaderFirstPass" type="x-shader/x-vertex">
     varying vec3 worldSpaceCoords;
+
+    vec3 toLocal(vec3 p) {
+  		return p + vec3(0.5);
+	}
+
     void main(){
         //Set the world space coordinates of the back faces vertices as output.
-        worldSpaceCoords = position + vec3(0.5, 0.5, 0.5); //move it from [-0.5;0.5] to [0,1]
+        worldSpaceCoords = toLocal(position); //move it from [-0.5;0.5] to [0,1]
         gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
     }
 </script>
@@ -33,10 +38,14 @@
 <script id="vertexShaderSecondPass" type="x-shader/x-vertex">
 	varying vec3 worldSpaceCoords;
 	varying vec4 projectedCoords;
+
+	vec3 toLocal(vec3 p) {
+  		return p + vec3(0.5);
+	}
 	
 	void main()
 	{
-		worldSpaceCoords = (modelMatrix * vec4(position + vec3(0.5, 0.5, 0.5), 1.0 )).xyz;
+		worldSpaceCoords = (modelMatrix * vec4(toLocal(position), 1.0 )).xyz;
 		gl_Position = projectionMatrix *  modelViewMatrix * vec4( position, 1.0 );
 		projectedCoords =  projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 	}
@@ -52,9 +61,15 @@
 
 
     const int MAX_STEPS = 512;
+    const float MIN_TRANS = 0.0;
     
-    const vec3 dataShape = vec3(99, 93, 330); // really this should be passed not hard coded
-    const vec2 textureShape = vec2(1024, 1024);
+    const vec3 dataShape = vec3(32, 32, 48); // really this should be passed not hard coded
+    const vec2 textureShape = vec2(144, 144);
+
+    vec3 toLocal(vec3 p) {
+    	// changes from clip coords (-0.5 -> 0.5) to local coords(0->1)
+  		return p + vec3(0.5);
+	}
 
     vec3 getDatumColor(float datum) {
     	vec3 color = vec3(255, 255, 255);
@@ -123,6 +138,67 @@
     	return vec4(color.xyz, alpha);
     }
 
+    vec4 getPathRGBA(vec3 startPos, vec3 endPos, float steps, sampler2D tex){
+    	/* Calculates the total RGBA values of a given path through a texture */
+
+    	//The direction from the front position to back position.
+	    vec3 dir = endPos - startPos;
+	
+	    float rayLength = length(dir);
+	
+	    //Calculate how long to increment in each step.
+	    float delta = 1.0 / steps;
+
+	    //The increment in each direction for each step.
+	    vec3 deltaDirection = normalize(dir) * delta;
+	    float deltaDirectionLength = length(deltaDirection);
+
+	    vec3 currentPosition = startPos;
+
+    	//The color accumulator.
+	    vec3 accumulatedColor = vec3(0.0);
+	
+        // the transmission of this data point
+        float thisTransmission;
+
+	    //The amount of transmission remaining.
+	    float remainingTransmission = 1.0;
+	
+	    //How long has the ray travelled so far.
+	    float accumulatedLength = 0.0;
+	
+	    //vec4 dataSample;
+	    vec4 dataSample;
+
+	    //Perform the ray marching iterations
+	    for(int i = 0; i < MAX_STEPS; i++){
+		    //Get the voxel intensity value from the 3D texture.	
+		    dataSample = getRGBAfromDataTex(dataTexture, currentPosition, dataShape, textureShape);
+			
+            // get the transmission of this data point from the alpha value
+            thisTransmission = exp( -alphaCorrection*delta*dataSample.a );
+		    
+            //Calculate the amount of light remaining.
+		    remainingTransmission *= thisTransmission;
+
+		    //Perform the composition.
+		    accumulatedColor += (1.0 - thisTransmission) * dataSample.xyz * remainingTransmission;
+			//accumulatedColor += dataSample;
+		
+		    //Advance the ray.
+		    currentPosition += deltaDirection;
+		    accumulatedLength += deltaDirectionLength;
+				      
+		    //If the length traversed is more than the ray length, or if the transmission < limit (no light left) then break
+		    if(accumulatedLength >= rayLength || remainingTransmission <= MIN_TRANS ){
+				break;
+			}
+	    }
+
+	    float alpha = (1.0 - remainingTransmission);
+	    return vec4(accumulatedColor.xyz/alpha, alpha);
+    }
+
     // max 2d size is 4096 x 4096
 
     void main( void ) {
@@ -135,59 +211,9 @@
 
 	    //The front position is the world space position of the second render pass.
 	    vec3 frontPos = worldSpaceCoords;
-
-	    //The direction from the front position to back position.
-	    vec3 dir = backPos - frontPos;
 	
-	    float rayLength = length(dir);
-	
-	    //Calculate how long to increment in each step.
-	    float delta = 1.0 / steps;
-
-	    //The increment in each direction for each step.
-	    vec3 deltaDirection = normalize(dir) * delta;
-	    float deltaDirectionLength = length(deltaDirection);
-
-	    //Start the ray casting from the front position.
-	    vec3 currentPosition = frontPos;
-	
-	    //The color accumulator.
-	    vec3 accumulatedColor = vec3(0.0);
-	
-	    //The alpha value accumulated so far.
-	    float accumulatedAlpha = 0.0;
-	
-	    //How long has the ray travelled so far.
-	    float accumulatedLength = 0.0;
-	
-	    //vec4 dataSample;
-	    vec4 dataSample;
-
-	    float alphaSample;
-
-	    //Perform the ray marching iterations
-	    for(int i = 0; i < MAX_STEPS; i++){
-		    //Get the voxel intensity value from the 3D texture.	
-		    dataSample = getRGBAfromDataTex(dataTexture, currentPosition, dataShape, textureShape);
-
-		    //Perform the composition.
-		    accumulatedColor += (1.0 - accumulatedAlpha) * dataSample.xyz * dataSample.a;
-			//accumulatedColor += dataSample;
-
-		    //Store the alpha accumulated so far.
-		    accumulatedAlpha += dataSample.a;
-		
-		    //Advance the ray.
-		    currentPosition += deltaDirection;
-		    accumulatedLength += deltaDirectionLength;
-				      
-		    //If the length traversed is more than the ray length, or if the alpha accumulated reaches 1.0 then exit.
-		    if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 ){
-				break;
-			}
-	    }
-	    vec4 fragColor = vec4(accumulatedColor.x, accumulatedColor.y, accumulatedColor.z, accumulatedAlpha);
-	    gl_FragColor = fragColor;
+		// cast ray from front position in direction of back position
+	    gl_FragColor = getPathRGBA(frontPos, backPos, steps, dataTexture);
     }
 
 </script>

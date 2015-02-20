@@ -1,10 +1,10 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
 var meshFirstPass;
 
-var alphaCorrection = 0.08; // just a fudge factor
-var nSteps = 500;
+var alphaCorrection = 4.5 ; // just a fudge factor
+var nSteps = 512;
 
-var fps = 30;
+var fps = 15;
 var now;
 var then = Date.now();
 var interval = 1000/fps;
@@ -18,11 +18,11 @@ function initVis() {
     
     /*** Camera ***/
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 1000);
-    camera.position.set(-1.73, 0.13, 0.9)
+    camera.position.set(-1.73, 0.13, 0.9);
 
     /***************** Data Cloud **********************/
     // load texture
-    dataTexture = THREE.ImageUtils.loadTexture('./test_blob_hr.png');
+    dataTexture = THREE.ImageUtils.loadTexture('./test_blob_32_32_48_144_144.png');
 
     var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
     boxGeometry.doubleSided = true;
@@ -57,7 +57,6 @@ function initVis() {
         side: THREE.FrontSide,
         uniforms: { firstPassTexture: { type: "t", value: firstPassTexture },
                          dataTexture: { type: "t", value: dataTexture },
-                       //transferTex: {type: "t", value: transferTexture },
                          steps : {type: "1f" , value: nSteps}, // so we know how long to make in incriment 
                          alphaCorrection : {type: "1f" , value: alphaCorrection }}
     });
@@ -69,13 +68,10 @@ function initVis() {
 
     /*************** Scene etc ************/
     renderer = new THREE.WebGLRenderer( { antialias: true} );
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight); // reducing these values effectively reduced resolution
     renderer.setClearColor( "rgb(135, 206, 250)", 1);
 
     document.body.appendChild(renderer.domElement);
-
-    //controls = new THREE.FirstPersonControls(camera, 
-    // controls.moveSpeed *= 100;
 
     // trackball controls
     controls = new THREE.TrackballControls(camera, renderer.domElement);
@@ -85,17 +81,13 @@ function initVis() {
     controls.dynamicDampingFactor = 0.3;
     controls.staticMoving = false;
     controls.noZoom = false;
-    controls.noPan = false;
-     /*** light ***/
-  /*  var directionalLight = new THREE.DirectionalLight(0xffff55, 1);
-    directionalLight.position.set(-600, 300, -600);
-    scene.add(directionalLight);*/
+    controls.noPan = false;        
 
-    var anotherBoxGeometry = new THREE.BoxGeometry(3, 3, 3);
-    var anotherMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
+    var anotherBoxGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+    var anotherMaterial = new THREE.MeshLambertMaterial( { color: 0xff0000, wireframe: false } );
     var anotherBoxMesh = new THREE.Mesh( anotherBoxGeometry, anotherMaterial );
+    anotherBoxMesh.position.set(.2, .2, .2);
     sceneSecondPass.add(anotherBoxMesh);
-    anotherBoxMesh.position = new THREE.Vector3( 2., 2., 2.);
 }
 
 
