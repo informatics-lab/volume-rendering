@@ -59,12 +59,11 @@
     uniform float steps;
     uniform float alphaCorrection;
 
+    uniform vec3 dataShape;
+    uniform vec2 textureShape;
 
     const int MAX_STEPS = 512;
     const float MIN_TRANS = 0.0;
-    
-    const vec3 dataShape = vec3(32, 32, 48); // really this should be passed not hard coded
-    const vec2 textureShape = vec2(144, 144);
 
     vec3 toLocal(vec3 p) {
     	// changes from clip coords (-0.5 -> 0.5) to local coords(0->1)
