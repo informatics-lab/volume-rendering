@@ -22,7 +22,10 @@ function initVis() {
 
     /***************** Data Cloud **********************/
     // load texture
-    dataTexture = THREE.ImageUtils.loadTexture('./test_blob_32_32_48_144_144.png');
+    var file = './test_blob_32_32_48_144_144.png';
+    var dataTexture = THREE.ImageUtils.loadTexture(file);
+
+    var dims = getDimensions(file);
 
     var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
     boxGeometry.doubleSided = true;
@@ -58,7 +61,10 @@ function initVis() {
         uniforms: { firstPassTexture: { type: "t", value: firstPassTexture },
                          dataTexture: { type: "t", value: dataTexture },
                          steps : {type: "1f" , value: nSteps}, // so we know how long to make in incriment 
-                         alphaCorrection : {type: "1f" , value: alphaCorrection }}
+                         alphaCorrection : {type: "1f" , value: alphaCorrection },
+                         dataShape: {type: "v3", value: dims.datashape},
+                         textureShape: {type: "v2", value: dims.textureshape}
+                     }
     });
     materialSecondPass.transparent = true;
     
@@ -88,6 +94,31 @@ function initVis() {
     var anotherBoxMesh = new THREE.Mesh( anotherBoxGeometry, anotherMaterial );
     anotherBoxMesh.position.set(.2, .2, .2);
     sceneSecondPass.add(anotherBoxMesh);
+}
+
+/**
+/ Parse dimension values from a formatted filename
+/ @param {string} filename - format "*_x_y_z_u_v.png"
+/       where (x,y,z) is datashape and (u,v) is textureshape
+/ @returns {Number[]}
+**/
+function getDimensions(filename) {
+    var sections = filename.split(".");
+    var name = sections[sections.length - 2];
+    var parts = name.split("_").filter( // might be a problem on old browsers
+        function(el) { return el !== ''; }
+    );
+    var numbers = parts.map(
+        function(el) { return Number(el); }
+    ).filter(
+        function(el) { return !isNaN(el); }
+    );
+    var result = {datashape:null, textureshape:null};
+    if (numbers.length >= 5) {
+        result.datashape = new THREE.Vector3(numbers[0], numbers[1], numbers[2]);
+        result.textureshape = new THREE.Vector2(numbers[3], numbers[4]);
+    }
+    return result;
 }
 
 
