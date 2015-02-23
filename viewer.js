@@ -100,7 +100,9 @@ function initVis() {
 / Parse dimension values from a formatted filename
 / @param {string} filename - format "*_x_y_z_u_v.png"
 /       where (x,y,z) is datashape and (u,v) is textureshape
-/ @returns {Number[]}
+/ @returns {Object}
+/   - {THREE.Vector3} datashape
+/   - {THREE.Vector2} textureshape
 **/
 function getDimensions(filename) {
     var sections = filename.split(".");
