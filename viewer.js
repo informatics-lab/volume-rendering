@@ -88,6 +88,8 @@ function initVis() {
     renderer.setSize(window.innerWidth/3, window.innerHeight/3); // reducing these values effectively reduced resolution
     renderer.setClearColor( "rgb(135, 206, 250)", 1);
 
+    renderer.domElement.style.cssText = "width: 100%;, height: 100%";
+
     document.body.appendChild(renderer.domElement);
 
     // add light
