@@ -1,8 +1,8 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
 var meshFirstPass;
 
-var alphaCorrection = .05 ; // just a fudge factor
-var nSteps = 64;
+var nSteps = 81;
+var alphaCorrection = 4.0/nSteps;
 
 var fps = 10;
 var now;
