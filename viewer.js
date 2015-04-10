@@ -29,7 +29,7 @@ function initVis() {
     gLight = light;
     /***************** Data Cloud **********************/
     // load texture
-    var file = './cloud_fraction_in_a_layer0_621_810_70_4096_4096.png';
+    var file = './cloud_frac_padded_623_812_70_4096_4096.png';
     // var file ="./test_blob_32_32_48_144_144.png"
     var dataTexture = THREE.ImageUtils.loadTexture(file);
 
