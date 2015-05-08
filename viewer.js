@@ -1,4 +1,4 @@
-var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
+var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex, stats;
 var meshFirstPass;
 
 var nSteps = 81;
@@ -110,6 +110,16 @@ function initVis() {
     var anotherBoxMesh = new THREE.Mesh( anotherBoxGeometry, anotherMaterial );
     anotherBoxMesh.position.set(.0, .6, .6);
     sceneSecondPass.add(anotherBoxMesh);
+
+    /** init stats **/
+    stats = new Stats();
+    stats.setMode(0);
+    // align top-left
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+
+    document.body.appendChild( stats.domElement );
 }
 
 /**
@@ -143,6 +153,7 @@ function getDimensions(filename) {
 function animate() {
     requestAnimationFrame(animate);
 
+    stats.begin();
     now = Date.now();
     delta = now - then;
      
@@ -153,10 +164,12 @@ function animate() {
         update();
         render();
     }
+    stats.end()
 }
 
 
 function update() {
+
 
 }
 
