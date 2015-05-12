@@ -1,21 +1,81 @@
-var renderer, sceneFirstPass, sceneSecondPass, camera, clock, firstPassTexture, dataTexture;
+var renderer, sceneFirstPass, sceneSecondPass, camera, clock, firstPassTexture, dataTexture, uniforms, attributes;
 var stats;
-
-var downScale = 10;
 
 var video, videoImage, videoImageContext;
 
 var nSteps = 81;
-var alphaCorrection = 4.0/nSteps;
+var opacFac = 4.0;
+var alphaCorrection = opacFac/nSteps;
+var mipMapTex = false;
+var downScaling = 7;
 
-var fps = 10;
 var now;
 var then = Date.now();
-var interval = 1000/fps;
 var delta;
 
+initGUI();
 initVis();
 animate();
+
+function initGUI() {
+    // dat.gui
+    gui = new dat.GUI({
+        height : 5 * 32 - 1,
+        width : 350
+    });
+
+
+    appearanceParams = {
+        "Opacity factor": opacFac,
+        "Number of steps": nSteps,
+        "Mip Map texture": mipMapTex,
+        "Downscaling": downScaling
+    }
+           
+    apperanceFolder = gui.addFolder("Apperance");
+    
+    var pOpacFac = apperanceFolder.add(appearanceParams, 'Opacity factor');
+    pOpacFac.onFinishChange(function(value){
+        opacFac = value;
+        uniforms.alphaCorrection.value = opacFac/nSteps;
+    });
+
+    var pnSteps = apperanceFolder.add(appearanceParams, 'Number of steps');
+    pnSteps.onChange(function(value){
+        nSteps = value;
+        uniforms.steps.value = nSteps;
+        uniforms.alphaCorrection.value = opacFac/nSteps;
+    });
+
+    var pMipMapTex = apperanceFolder.add(appearanceParams, 'Mip Map texture');
+    pMipMapTex.onChange(function(value){
+        mipMapTex = value;
+        if (mipMapTex){
+            dataTexture.generateMipmaps = true;
+            dataTexture.magFilter = THREE.LinearMipMapLinearFilter;
+            dataTexture.minFilter = THREE.LinearMipMapLinearFilter;
+        }else{
+            dataTexture.generateMipmaps = false;
+            dataTexture.magFilter = THREE.LinearFilter;
+            dataTexture.minFilter = THREE.LinearFilter;
+        };
+        dataTexture.needsUpdate = true;
+    });
+
+    var pDownScaling = apperanceFolder.add(appearanceParams, 'Downscaling');
+    pDownScaling.onChange(function(value){
+        downScaling = value;
+        renderer.setSize(window.innerWidth/downScaling, window.innerHeight/downScaling);
+        renderer.domElement.style.cssText = "width: 100%;, height: 100%";
+    });
+    
+    // stats
+    stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '5px';
+    stats.domElement.style.margin = '5px';
+    document.body.appendChild( stats.domElement );
+}
 
 function initVis() {
     clock = new THREE.Clock();
@@ -53,9 +113,15 @@ function initVis() {
     videoImageContext.fillRect( 0, 0, videoImage.width, videoImage.height );
 
     dataTexture = new THREE.Texture( videoImage );
-    dataTexture.generateMipmaps = false;
-    dataTexture.magFilter = THREE.LinearFilter;
-    dataTexture.minFilter = THREE.LinearFilter;
+    if (mipMapTex){
+        dataTexture.generateMipmaps = true;
+        dataTexture.magFilter = THREE.LinearMipMapLinearFilter;
+        dataTexture.minFilter = THREE.LinearMipMapLinearFilter;
+    }else{
+        dataTexture.generateMipmaps = false;
+        dataTexture.magFilter = THREE.LinearFilter;
+        dataTexture.minFilter = THREE.LinearFilter;
+    };
 
     /*** first pass ***/
 	var materialFirstPass = new THREE.ShaderMaterial( {
@@ -81,11 +147,7 @@ function initVis() {
     firstPassTexture.wrapS = firstPassTexture.wrapT = THREE.ClampToEdgeWrapping;    
     
     /*** second pass ***/
-    materialSecondPass = new THREE.ShaderMaterial( {
-        vertexShader: document.getElementById( 'vertexShaderSecondPass' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShaderSecondPass' ).textContent,
-        side: THREE.FrontSide,
-        uniforms: { firstPassTexture: { type: "t", value: firstPassTexture },
+    uniforms = { firstPassTexture: { type: "t", value: firstPassTexture },
                          dataTexture: { type: "t", value: dataTexture },
                          lightPosition: { type: "v3", value: light.position},
                          lightColor: { type: "v3", value: {x: light.color.r, y:light.color.g, z:light.color.b}},
@@ -94,7 +156,13 @@ function initVis() {
                          alphaCorrection : {type: "1f" , value: alphaCorrection },
                          dataShape: {type: "v3", value: dims.datashape},
                          textureShape: {type: "v2", value: dims.textureshape}
-                     }
+                     };
+
+    materialSecondPass = new THREE.ShaderMaterial( {
+        vertexShader: document.getElementById( 'vertexShaderSecondPass' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShaderSecondPass' ).textContent,
+        side: THREE.FrontSide,
+        uniforms: uniforms
     });
     materialSecondPass.transparent = true;
     
@@ -104,7 +172,7 @@ function initVis() {
 
     /*************** Scene etc ************/
     renderer = new THREE.WebGLRenderer( { antialias: true} );
-    renderer.setSize(window.innerWidth/downScale, window.innerHeight/downScale); // reducing these values effectively reduced resolution
+    renderer.setSize(window.innerWidth/downScaling, window.innerHeight/downScaling); // reducing these values effectively reduced resolution
     renderer.setClearColor( "rgb(135, 206, 250)", 1);
 
     renderer.domElement.style.cssText = "width: 100%;, height: 100%";
@@ -122,17 +190,7 @@ function initVis() {
     controls.dynamicDampingFactor = 0.3;
     controls.staticMoving = false;
     controls.noZoom = false;
-    controls.noPan = false;
-
-    /** init stats **/
-    stats = new Stats();
-    stats.setMode(0);
-    // align top-left
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.left = '0px';
-    stats.domElement.style.top = '0px';
-
-    document.body.appendChild( stats.domElement );
+    controls.noPan = false;  
 }
 
 /**
@@ -169,14 +227,9 @@ function animate() {
     stats.begin();
     now = Date.now();
     delta = now - then;
-     
-    if (delta > interval) {
-        // update time stuffs
-        then = now - (delta % interval);
-         
-        update();
-        render();
-    }
+    controls.update(delta);
+    update();
+    render();
     stats.end();
 }
 
