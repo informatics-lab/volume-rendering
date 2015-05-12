@@ -184,7 +184,13 @@ function initVis() {
     scene.add( meshSecondPass );  
 
     /*************** Add map **************/
-    
+    var mapImage = THREE.ImageUtils.loadTexture("./res/uk.jpg");
+    var mapMaterial = new THREE.MeshLambertMaterial({ map : mapImage });
+    var mapPlane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mapMaterial);
+    mapPlane.doubleSided = true;
+    mapPlane.position.z = -0.5;
+    // plane.rotation.z = 2;  // Not sure what this number represents.
+    scene.add(mapPlane);
 
     /*************** Scene etc ************/
     renderer = new THREE.WebGLRenderer( { antialias: true} );
