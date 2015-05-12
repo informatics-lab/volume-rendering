@@ -1,5 +1,9 @@
-var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, datatex;
+var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, dataTexture;
 var meshFirstPass;
+
+var keyboard = new THREEx.KeyboardState();
+
+var video, videoImage, videoImageContext, videoTexture;
 
 var nSteps = 81;
 var alphaCorrection = 4.0/nSteps;
@@ -27,16 +31,35 @@ function initVis() {
     light.position.set(0., 0., 20.);
     light.intensity = 3;
     gLight = light;
-    /***************** Data Cloud **********************/
-    // load texture
-    var file = './cloud_frac_padded_623_812_70_4096_4096.png';
-    // var file ="./test_blob_32_32_48_144_144.png"
-    var dataTexture = THREE.ImageUtils.loadTexture(file);
-
-    var dims = getDimensions(file);
 
     var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
     boxGeometry.doubleSided = true;
+
+    /* video texture */
+    //file = "https://s3-eu-west-1.amazonaws.com/informatics-data/lab_data/cloud_frac_623_812_70_4096_4096.ogv";
+    file = "./cloud_frac_623_812_70_4096_4096.ogv";
+    dims = getDimensions(file);
+
+    video = document.createElement( 'video' );
+    video.id = 'video';
+    video.type = ' video/ogg; codecs="theora, vorbis" ';
+    video.src = file;
+    video.load(); // must call after setting/changing source
+    video.play();
+    
+    videoImage = document.createElement( 'canvas' );
+    videoImage.width = dims.textureshape.x;
+    videoImage.height = dims.textureshape.y;
+
+    videoImageContext = videoImage.getContext( '2d' );
+    // background color if no video present
+    videoImageContext.fillStyle = '#000000';
+    videoImageContext.fillRect( 0, 0, videoImage.width, videoImage.height );
+
+    dataTexture = new THREE.Texture( videoImage );
+    //dataTexture.generateMipmaps = false;
+    //dataTexture.magFilter = THREE.LinearFilter;
+    //dataTexture.minFilter = THREE.LinearFilter;
 
     /*** first pass ***/
 	var materialFirstPass = new THREE.ShaderMaterial( {
@@ -157,14 +180,35 @@ function animate() {
 
 
 function update() {
+    if ( keyboard.pressed("p") )
+        video.play();
+        
+    if ( keyboard.pressed("space") )
+        video.pause();
 
+    if ( keyboard.pressed("s") ) // stop video
+    {
+        video.pause();
+        video.currentTime = 0;
+    }
+    
+    if ( keyboard.pressed("r") ) // rewind video
+        video.currentTime = 0;
+    
+    controls.update();
 }
 
 
 function render() {
-    controls.update();
     //Render first pass and store the world space coords of the back face fragments into the texture.
     renderer.render( sceneFirstPass, camera, firstPassTexture, true);
+
+    if ( video.readyState === video.HAVE_ENOUGH_DATA ) 
+    {
+        videoImageContext.drawImage( video, 0, 0 );
+        if ( dataTexture ) 
+            dataTexture.needsUpdate = true;
+    }
     //Render the second pass and perform the volume rendering.
     renderer.render( sceneSecondPass, camera );
 }

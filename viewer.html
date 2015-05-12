@@ -6,8 +6,9 @@
 </head>
 <body>
 
-<script src="./three.min.js"></script>
-<script type="text/javascript" src=	"./TrackballControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
+<script src="./res/THREEx.KeyboardState.js"></script>
+<script type="text/javascript" src=	"./res/TrackballControls.js"></script>
 
 <!-- first pass shaders -->
 
@@ -101,13 +102,14 @@
         
         vec2 thisPoint = vec2(xTile+pos.x, yTile+pos.y) * tileDim;
 
+        vec4 datumRGB = texture2D(tex, thisPoint);
         float datum;
         if (zTile == 0.0){
-            datum = texture2D(tex, thisPoint).r;
+            datum = datumRGB.r;
         }else if (zTile == 1.0){
-            datum = texture2D(tex, thisPoint).g;
+            datum = datumRGB.g;
         }else if (zTile == 2.0){
-            datum = texture2D(tex, thisPoint).b;
+            datum = datumRGB.b;
         }
 
         return datum;
