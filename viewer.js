@@ -8,13 +8,15 @@ var opacFac = 4.0;
 var alphaCorrection = opacFac/nSteps;
 var mipMapTex = false;
 var downScaling = 7;
+var light;
+var play = true;
 
 var now;
 var then = Date.now();
 var delta;
 
-initGUI();
 initVis();
+initGUI();
 animate();
 
 function initGUI() {
@@ -29,8 +31,8 @@ function initGUI() {
         "Opacity factor": opacFac,
         "Number of steps": nSteps,
         "Mip Map texture": mipMapTex,
-        "Downscaling": downScaling
-    }
+        "Downscaling": downScaling,
+    };
            
     apperanceFolder = gui.addFolder("Apperance");
     
@@ -68,6 +70,14 @@ function initGUI() {
         renderer.setSize(window.innerWidth/downScaling, window.innerHeight/downScaling);
         renderer.domElement.style.cssText = "width: 100%;, height: 100%";
     });
+
+    animationParams = {
+        "Pause": function(){play = !play;
+                            play ? pPlay.name("Pause") : pPlay.name("Play");}
+    }
+
+    animationCtrlFolder = gui.addFolder("Animation");
+    pPlay = animationCtrlFolder.add(animationParams, 'Pause');
     
     // stats
     stats = new Stats();
@@ -85,7 +95,7 @@ function initVis() {
     camera.position.set(-1.0, -3.0, 1.5);
 
     /*** light ***/
-    var light = new THREE.PointLight(0xFFFFFF);
+    light = new THREE.PointLight(0xFFFFFF);
     light.position.set(0., 0., 20.);
     light.intensity = 3;
 
@@ -100,6 +110,7 @@ function initVis() {
     video.id = 'video';
     video.type = ' video/ogg; codecs="theora, vorbis" ';
     video.src = file;
+    video.loop = true;
     video.load(); // must call after setting/changing source
     video.play();
     
@@ -235,21 +246,11 @@ function animate() {
 
 
 function update() {
-    // if ( keyboard.pressed("p") )
-    //     video.play();
-        
-    // if ( keyboard.pressed("space") )
-    //     video.pause();
-
-    // if ( keyboard.pressed("s") ) // stop video
-    // {
-    //     video.pause();
-    //     video.currentTime = 0;
-    // }
-    
-    // if ( keyboard.pressed("r") ) // rewind video
-    //     video.currentTime = 0;
-    
+    if (play){
+        video.play();
+    }else{
+        video.pause();
+    }
     controls.update();
 }
 
