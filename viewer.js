@@ -1,4 +1,5 @@
 var renderer, sceneFirstPass, sceneSecondPass, camera, clock, firstPassTexture, dataTexture;
+var stats;
 
 var downScale = 10;
 
@@ -21,7 +22,7 @@ function initVis() {
     
     /*** Camera ***/
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 1000);
-    camera.position.set(-1.73, 0.13, 0.9);
+    camera.position.set(-1.0, -3.0, 1.5);
 
     /*** light ***/
     var light = new THREE.PointLight(0xFFFFFF);
@@ -121,13 +122,17 @@ function initVis() {
     controls.dynamicDampingFactor = 0.3;
     controls.staticMoving = false;
     controls.noZoom = false;
-    controls.noPan = false;        
+    controls.noPan = false;
 
-    var anotherBoxGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-    var anotherMaterial = new THREE.MeshLambertMaterial( { color: 0xff0000, wireframe: false } );
-    var anotherBoxMesh = new THREE.Mesh( anotherBoxGeometry, anotherMaterial );
-    anotherBoxMesh.position.set(.0, .6, .6);
-    sceneSecondPass.add(anotherBoxMesh);
+    /** init stats **/
+    stats = new Stats();
+    stats.setMode(0);
+    // align top-left
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+
+    document.body.appendChild( stats.domElement );
 }
 
 /**
@@ -161,6 +166,7 @@ function getDimensions(filename) {
 function animate() {
     requestAnimationFrame(animate);
 
+    stats.begin();
     now = Date.now();
     delta = now - then;
      
@@ -171,6 +177,7 @@ function animate() {
         update();
         render();
     }
+    stats.end();
 }
 
 
