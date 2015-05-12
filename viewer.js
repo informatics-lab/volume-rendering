@@ -1,4 +1,4 @@
-var renderer, sceneFirstPass, sceneSecondPass, camera, clock, firstPassTexture, dataTexture, uniforms, attributes;
+var renderer, sceneFirstPass, scene, camera, clock, firstPassTexture, dataTexture, uniforms, attributes;
 var stats;
 
 var video, videoImage, videoImageContext;
@@ -6,13 +6,15 @@ var video, videoImage, videoImageContext;
 var nSteps = 81;
 var opacFac = 4.0;
 var alphaCorrection = opacFac/nSteps;
-var mipMapTex = false;
+var mipMapTex = true;
 var downScaling = 7;
 var light;
 var play = true;
 
+var fps = 10;
 var now;
 var then = Date.now();
+var interval = 1000/fps;
 var delta;
 
 initVis();
@@ -54,12 +56,12 @@ function initGUI() {
         mipMapTex = value;
         if (mipMapTex){
             dataTexture.generateMipmaps = true;
-            dataTexture.magFilter = THREE.LinearMipMapLinearFilter;
+            dataTexture.magFilter = THREE.LinearFilter;
             dataTexture.minFilter = THREE.LinearMipMapLinearFilter;
         }else{
             dataTexture.generateMipmaps = false;
-            dataTexture.magFilter = THREE.LinearFilter;
-            dataTexture.minFilter = THREE.LinearFilter;
+            dataTexture.magFilter = THREE.NearestFilter;
+            dataTexture.minFilter = THREE.NearestFilter;
         };
         dataTexture.needsUpdate = true;
     });
@@ -126,7 +128,7 @@ function initVis() {
     dataTexture = new THREE.Texture( videoImage );
     if (mipMapTex){
         dataTexture.generateMipmaps = true;
-        dataTexture.magFilter = THREE.LinearMipMapLinearFilter;
+        dataTexture.magFilter = THREE.LinearFilter;
         dataTexture.minFilter = THREE.LinearMipMapLinearFilter;
     }else{
         dataTexture.generateMipmaps = false;
@@ -177,9 +179,12 @@ function initVis() {
     });
     materialSecondPass.transparent = true;
     
-    sceneSecondPass = new THREE.Scene();
+    scene = new THREE.Scene();
     var meshSecondPass = new THREE.Mesh( boxGeometry, materialSecondPass );
-    sceneSecondPass.add( meshSecondPass );  
+    scene.add( meshSecondPass );  
+
+    /*************** Add map **************/
+    
 
     /*************** Scene etc ************/
     renderer = new THREE.WebGLRenderer( { antialias: true} );
@@ -191,7 +196,7 @@ function initVis() {
     document.body.appendChild(renderer.domElement);
 
     // add light
-    sceneSecondPass.add(light);
+    scene.add(light);
 
     // trackball controls
     controls = new THREE.TrackballControls(camera, renderer.domElement);
@@ -231,19 +236,23 @@ function getDimensions(filename) {
     return result;
 }
 
-
 function animate() {
     requestAnimationFrame(animate);
 
     stats.begin();
     now = Date.now();
     delta = now - then;
-    controls.update(delta);
-    update();
-    render();
+     
+    if (delta > interval) {
+        // update time stuffs
+        then = now - (delta % interval);
+         
+        update();
+        render();
+    }
+
     stats.end();
 }
-
 
 function update() {
     if (play){
@@ -266,5 +275,5 @@ function render() {
             dataTexture.needsUpdate = true;
     }
     //Render the second pass and perform the volume rendering.
-    renderer.render( sceneSecondPass, camera );
+    renderer.render( scene, camera );
 }
