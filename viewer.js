@@ -63,8 +63,8 @@ function initVis() {
 
     /*** first pass ***/
 	var materialFirstPass = new THREE.ShaderMaterial( {
-        vertexShader: document.getElementById( 'vertexShaderFirstPass' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShaderFirstPass' ).textContent,
+        vertexShader: loadTextFile("shaders/back-face-vs.glsl"),
+        fragmentShader: loadTextFile("shaders/back-face-fs.glsl"),
         side: THREE.BackSide
     });
 
@@ -86,8 +86,8 @@ function initVis() {
     
     /*** second pass ***/
     materialSecondPass = new THREE.ShaderMaterial( {
-        vertexShader: document.getElementById( 'vertexShaderSecondPass' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShaderSecondPass' ).textContent,
+        vertexShader: loadTextFile("shaders/volume-renderer-vs.glsl"),
+        fragmentShader: loadTextFile("shaders/volume-renderer-fs.glsl"),
         side: THREE.FrontSide,
         uniforms: { firstPassTexture: { type: "t", value: firstPassTexture },
                          dataTexture: { type: "t", value: dataTexture },
@@ -211,4 +211,21 @@ function render() {
     }
     //Render the second pass and perform the volume rendering.
     renderer.render( sceneSecondPass, camera );
+}
+
+// perform synchronous ajax load
+function loadTextFile(url) {
+  var result;
+  
+  $.ajax({
+    url:      url,
+    type:     "GET",
+    async:    false,
+    dataType: "text",
+    success:  function(data) {
+      result = data;
+    }
+  });
+  
+  return result;
 }
