@@ -1,9 +1,8 @@
-var renderer, sceneFirstPass, sceneSecondPass, camera, uniforms, attributes, clock, firstPassTexture, dataTexture;
-var meshFirstPass;
+var renderer, sceneFirstPass, sceneSecondPass, camera, clock, firstPassTexture, dataTexture;
 
-var keyboard = new THREEx.KeyboardState();
+var downScale = 10;
 
-var video, videoImage, videoImageContext, videoTexture;
+var video, videoImage, videoImageContext;
 
 var nSteps = 81;
 var alphaCorrection = 4.0/nSteps;
@@ -17,8 +16,6 @@ var delta;
 initVis();
 animate();
 
-var gLight;
-
 function initVis() {
     clock = new THREE.Clock();
     
@@ -30,13 +27,11 @@ function initVis() {
     var light = new THREE.PointLight(0xFFFFFF);
     light.position.set(0., 0., 20.);
     light.intensity = 3;
-    gLight = light;
 
     var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
     boxGeometry.doubleSided = true;
 
     /* video texture */
-    //file = "https://s3-eu-west-1.amazonaws.com/informatics-data/lab_data/cloud_frac_623_812_70_4096_4096.ogv";
     file = "./cloud_frac_623_812_70_4096_4096.ogv";
     dims = getDimensions(file);
 
@@ -57,18 +52,18 @@ function initVis() {
     videoImageContext.fillRect( 0, 0, videoImage.width, videoImage.height );
 
     dataTexture = new THREE.Texture( videoImage );
-    //dataTexture.generateMipmaps = false;
-    //dataTexture.magFilter = THREE.LinearFilter;
-    //dataTexture.minFilter = THREE.LinearFilter;
+    dataTexture.generateMipmaps = false;
+    dataTexture.magFilter = THREE.LinearFilter;
+    dataTexture.minFilter = THREE.LinearFilter;
 
     /*** first pass ***/
 	var materialFirstPass = new THREE.ShaderMaterial( {
-        vertexShader: loadTextFile("shaders/back-face-vs.glsl"),
-        fragmentShader: loadTextFile("shaders/back-face-fs.glsl"),
+        vertexShader: document.getElementById( 'vertexShaderFirstPass' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShaderFirstPass' ).textContent,
         side: THREE.BackSide
     });
 
-    meshFirstPass = new THREE.Mesh( boxGeometry, materialFirstPass );
+    var meshFirstPass = new THREE.Mesh( boxGeometry, materialFirstPass );
     
     sceneFirstPass = new THREE.Scene();
     sceneFirstPass.add( meshFirstPass );
@@ -86,8 +81,8 @@ function initVis() {
     
     /*** second pass ***/
     materialSecondPass = new THREE.ShaderMaterial( {
-        vertexShader: loadTextFile("shaders/volume-renderer-vs.glsl"),
-        fragmentShader: loadTextFile("shaders/volume-renderer-fs.glsl"),
+        vertexShader: document.getElementById( 'vertexShaderSecondPass' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShaderSecondPass' ).textContent,
         side: THREE.FrontSide,
         uniforms: { firstPassTexture: { type: "t", value: firstPassTexture },
                          dataTexture: { type: "t", value: dataTexture },
@@ -108,7 +103,7 @@ function initVis() {
 
     /*************** Scene etc ************/
     renderer = new THREE.WebGLRenderer( { antialias: true} );
-    renderer.setSize(window.innerWidth/3, window.innerHeight/3); // reducing these values effectively reduced resolution
+    renderer.setSize(window.innerWidth/downScale, window.innerHeight/downScale); // reducing these values effectively reduced resolution
     renderer.setClearColor( "rgb(135, 206, 250)", 1);
 
     renderer.domElement.style.cssText = "width: 100%;, height: 100%";
@@ -180,20 +175,20 @@ function animate() {
 
 
 function update() {
-    if ( keyboard.pressed("p") )
-        video.play();
+    // if ( keyboard.pressed("p") )
+    //     video.play();
         
-    if ( keyboard.pressed("space") )
-        video.pause();
+    // if ( keyboard.pressed("space") )
+    //     video.pause();
 
-    if ( keyboard.pressed("s") ) // stop video
-    {
-        video.pause();
-        video.currentTime = 0;
-    }
+    // if ( keyboard.pressed("s") ) // stop video
+    // {
+    //     video.pause();
+    //     video.currentTime = 0;
+    // }
     
-    if ( keyboard.pressed("r") ) // rewind video
-        video.currentTime = 0;
+    // if ( keyboard.pressed("r") ) // rewind video
+    //     video.currentTime = 0;
     
     controls.update();
 }
@@ -211,21 +206,4 @@ function render() {
     }
     //Render the second pass and perform the volume rendering.
     renderer.render( sceneSecondPass, camera );
-}
-
-// perform synchronous ajax load
-function loadTextFile(url) {
-  var result;
-  
-  $.ajax({
-    url:      url,
-    type:     "GET",
-    async:    false,
-    dataType: "text",
-    success:  function(data) {
-      result = data;
-    }
-  });
-  
-  return result;
 }
