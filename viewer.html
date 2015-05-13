@@ -296,6 +296,28 @@
 
 </script>
 
+<script id="vertexShaderResampleRayMarch" type="x-shader/x-vertex">
+    varying vec4 projectedCoords;
+
+    void main(){
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        projectedCoords =  projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+    }
+</script>
+
+<script id="fragmentShaderResampleRayMarch" type="x-shader/x-fragment">
+    uniform sampler2D rayMarchTexture;
+
+    varying vec4 projectedCoords;
+
+    void main(){
+        //The fragment's world space coordinates as fragment output.
+        vec2 texCoord = vec2(((projectedCoords.x / projectedCoords.w) + 1.0 ) / 2.0,
+                        ((projectedCoords.y / projectedCoords.w) + 1.0 ) / 2.0 );
+        gl_FragColor = texture2D(rayMarchTexture, texCoord);
+    }
+</script>
+
 
 <script src="viewer.js"></script>
 </body>

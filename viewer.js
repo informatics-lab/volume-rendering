@@ -1,4 +1,4 @@
-var renderer, sceneBackFace, scene, camera, clock, backFaceTexture, dataTexture, uniforms, attributes;
+var renderer, sceneBackFace, sceneRayMarch, scene, camera, clock, backFaceTexture, dataTexture, uniforms, attributes;
 var stats;
 
 var video, videoImage, videoImageContext;
@@ -6,8 +6,8 @@ var video, videoImage, videoImageContext;
 var nSteps = 81;
 var opacFac = 4.0;
 var alphaCorrection = opacFac/nSteps;
-var mipMapTex = true;
-var downScaling = 5;
+var mipMapTex = false;
+var downScaling = 10;
 var light;
 var play = true;
 
@@ -71,6 +71,7 @@ function initGUI() {
     var pDownScaling = apperanceFolder.add(appearanceParams, 'Downscaling');
     pDownScaling.onChange(function(value){
         downScaling = value;
+        rayMarchTexture
         renderer.setSize(window.innerWidth/downScaling, window.innerHeight/downScaling);
         renderer.domElement.style.cssText = "width: 100%;, height: 100%";
     });
@@ -97,7 +98,7 @@ function initVis() {
     clock = new THREE.Clock();
     
     /*** Camera ***/
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 1000);
     camera.rotation.order = "YXZ";
     camera.position.set(2.0, 1.0, 2.0);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -150,12 +151,10 @@ function initVis() {
         side: THREE.BackSide
     });
 
-    var meshbackFace = new THREE.Mesh( boxGeometry, materialbackFace );
-    // meshbackFace.rotation.x = -Math.PI/2;
+    var meshBackFace = new THREE.Mesh( boxGeometry, materialbackFace );
     
     sceneBackFace = new THREE.Scene();
-    sceneBackFace.add( meshbackFace );
-
+    sceneBackFace.add( meshBackFace );
     
     // get the "colour" coords we just made, as a texture
     backFaceTexture = new THREE.WebGLRenderTarget(  window.innerWidth/downScaling,
@@ -164,7 +163,6 @@ function initVis() {
                                                magFilter: THREE.NearestFilter,
                                                format: THREE.RGBFormat,
                                                type: THREE.FloatType } );
-
     backFaceTexture.wrapS = backFaceTexture.wrapT = THREE.ClampToEdgeWrapping;    
     
     /*** second pass ***/
@@ -185,12 +183,34 @@ function initVis() {
         side: THREE.FrontSide,
         uniforms: uniforms
     });
-    materialRayMarch.transparent = true;
+    // materialRayMarch.transparent = true;
     
-    scene = new THREE.Scene();
+    sceneRayMarch = new THREE.Scene();
     var meshRayMarch = new THREE.Mesh( boxGeometry, materialRayMarch );
-    // meshRayMarch.rotation.x = Math.PI/2;
-    scene.add( meshRayMarch );  
+    sceneRayMarch.add( meshRayMarch );
+
+    rayMarchTexture = new THREE.WebGLRenderTarget(  window.innerWidth/downScaling,
+                                                     window.innerHeight/downScaling,
+                                             { minFilter: THREE.LinearFilter,
+                                               magFilter: THREE.LinearFilter,
+                                               format: THREE.RGBAFormat,
+                                               type: THREE.FloatType } );
+    rayMarchTexture.wrapS = rayMarchTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+    /*************** Resample ray marching ****/
+    var uniforms2 = {rayMarchTexture: {type: "t", value: rayMarchTexture}};
+    materialResampledRayMarch = new THREE.ShaderMaterial( {
+        vertexShader: document.getElementById( 'vertexShaderResampleRayMarch' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShaderResampleRayMarch' ).textContent,
+        side: THREE.FrontSide,
+        uniforms: uniforms2
+    });
+    materialResampledRayMarch.transparent = true;
+    var meshResampledRayMarch = new THREE.Mesh( boxGeometry, materialResampledRayMarch );
+
+    scene = new THREE.Scene();
+    scene.add(meshResampledRayMarch)
+
 
     /*************** Add map **************/
     var mapImage = THREE.ImageUtils.loadTexture("./res/uk.jpg");
@@ -198,6 +218,7 @@ function initVis() {
     var mapPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), mapMaterial);
     mapPlane.rotation.x = -Math.PI / 2;
     mapPlane.position.y = -0.5;
+
     scene.add(mapPlane);
 
     /*************** add aquarium outline **/
@@ -208,7 +229,7 @@ function initVis() {
 
     /*************** Scene etc ************/
     renderer = new THREE.WebGLRenderer( { antialias: true} );
-    renderer.setSize(window.innerWidth/downScaling, window.innerHeight/downScaling); // reducing these values effectively reduced resolution
+    renderer.setSize(window.innerWidth, window.innerHeight); // reducing these values effectively reduced resolution
     renderer.setClearColor( "rgb(135, 206, 250)", 1);
 
     renderer.domElement.style.cssText = "width: 100%;, height: 100%";
@@ -291,6 +312,7 @@ function render() {
             dataTexture.needsUpdate = true;
     }
     //Render the second pass and perform the volume rendering.
+    renderer.render( sceneRayMarch, camera, rayMarchTexture, true );
     renderer.render( scene, camera );
 }
 
@@ -314,6 +336,3 @@ var debugaxis = function(axisLength){
     createAxis(v(0, -axisLength, 0), v(0, axisLength, 0), 0x00FF00);
     createAxis(v(0, 0, -axisLength), v(0, 0, axisLength), 0x0000FF);
 };
-
-//To use enter the axis length
-debugaxis(1);
