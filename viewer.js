@@ -179,18 +179,18 @@ function initVis() {
                          textureShape: {type: "v2", value: dims.textureshape}
                      };
 
-    materialSecondPass = new THREE.ShaderMaterial( {
-        vertexShader: document.getElementById( 'vertexShaderSecondPass' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShaderSecondPass' ).textContent,
+    materialRayMarch = new THREE.ShaderMaterial( {
+        vertexShader: document.getElementById( 'vertexShaderRayMarch' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShaderRayMarch' ).textContent,
         side: THREE.FrontSide,
         uniforms: uniforms
     });
-    materialSecondPass.transparent = true;
+    materialRayMarch.transparent = true;
     
     scene = new THREE.Scene();
-    var meshSecondPass = new THREE.Mesh( boxGeometry, materialSecondPass );
-    // meshSecondPass.rotation.x = Math.PI/2;
-    scene.add( meshSecondPass );  
+    var meshRayMarch = new THREE.Mesh( boxGeometry, materialRayMarch );
+    // meshRayMarch.rotation.x = Math.PI/2;
+    scene.add( meshRayMarch );  
 
     /*************** Add map **************/
     var mapImage = THREE.ImageUtils.loadTexture("./res/uk.jpg");

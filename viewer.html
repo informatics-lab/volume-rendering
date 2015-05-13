@@ -37,7 +37,7 @@
 
 
 <!-- second pass shaders -->
-<script id="vertexShaderSecondPass" type="x-shader/x-vertex">
+<script id="vertexShaderRayMarch" type="x-shader/x-vertex">
 	varying vec3 worldSpaceCoords;
 	varying vec4 projectedCoords;
 
@@ -53,7 +53,7 @@
 	}
 </script>
 
-<script id="fragmentShaderSecondPass" type="x-shader/x-fragment">
+<script id="fragmentShaderRayMarch" type="x-shader/x-fragment">
     varying vec3 worldSpaceCoords;
     varying vec4 projectedCoords;
 
