@@ -158,8 +158,8 @@ function initVis() {
 
     
     // get the "colour" coords we just made, as a texture
-    firstPassTexture = new THREE.WebGLRenderTarget(  window.innerWidth,
-                                                     window.innerHeight,
+    firstPassTexture = new THREE.WebGLRenderTarget(  window.innerWidth/downScaling,
+                                                     window.innerHeight/downScaling,
                                              { minFilter: THREE.NearestFilter,
                                                magFilter: THREE.NearestFilter,
                                                format: THREE.RGBFormat,
