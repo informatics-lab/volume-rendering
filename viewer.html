@@ -101,7 +101,7 @@
         float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
         float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
         
-        vec2 thisPoint = vec2(xTile+pos.x, yTile+pos.y) * tileDim;
+        vec2 thisPoint = vec2(xTile+pos.x, yTile+pos.z) * tileDim;
 
         vec4 datumRGB = texture2D(tex, thisPoint);
         float datum;
@@ -133,13 +133,13 @@
         vec2 nTiles = vec2(floor(fracNTiles.x), floor(fracNTiles.y));
         float tilesPerLayer = nTiles.x * nTiles.y;
         vec2 tileDim = vec2(1.0, 1.0) / fracNTiles;
-        float thisTileN = floor((dataShape.z-1.0) * pos.z);
+        float thisTileN = floor((dataShape.z-1.0) * pos.y);
         float thisTileNp1 = min(thisTileN+1.0, dataShape.z);
 
         float datumN = getDatum(tex, pos, dataShape, nTiles, tilesPerLayer, tileDim, thisTileN);
         float datumNp1 = getDatum(tex, pos, dataShape, nTiles, tilesPerLayer, tileDim, thisTileNp1);
 
-        float zDiff = mod((dataShape.z-1.0) * pos.z, 1.0);
+        float zDiff = mod((dataShape.z-1.0) * pos.y, 1.0);
 
         return ((1.0 - zDiff) * datumN) + (zDiff * datumNp1);
     }
