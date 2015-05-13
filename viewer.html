@@ -13,7 +13,7 @@
 
 <!-- first pass shaders -->
 
-<script id="vertexShaderFirstPass" type="x-shader/x-vertex">
+<script id="vertexShaderBackFace" type="x-shader/x-vertex">
     varying vec3 worldSpaceCoords;
 
     vec3 toLocal(vec3 p) {
@@ -27,7 +27,7 @@
     }
 </script>
 
-<script id="fragmentShaderFirstPass" type="x-shader/x-fragment">
+<script id="fragmentShaderBackFace" type="x-shader/x-fragment">
     varying vec3 worldSpaceCoords;
     void main(){
         //The fragment's world space coordinates as fragment output.
@@ -57,7 +57,7 @@
     varying vec3 worldSpaceCoords;
     varying vec4 projectedCoords;
 
-    uniform sampler2D firstPassTexture, dataTexture; //i.e. tex and cubeTex
+    uniform sampler2D backFaceTexture, dataTexture; //i.e. tex and cubeTex
     uniform vec3 lightPosition;
     uniform vec3 lightColor;
     uniform float lightIntensity;
@@ -280,11 +280,11 @@
 
     void main( void ) {
         //Transform the coordinates it from [-1;1] to [0;1]
-        vec2 firstPassTexCoord = vec2(((projectedCoords.x / projectedCoords.w) + 1.0 ) / 2.0,
+        vec2 backFaceTexCoord = vec2(((projectedCoords.x / projectedCoords.w) + 1.0 ) / 2.0,
                         ((projectedCoords.y / projectedCoords.w) + 1.0 ) / 2.0 );
 
         //The back position is the world space position stored in the texture.
-        vec3 backPos = texture2D(firstPassTexture, firstPassTexCoord).xyz;
+        vec3 backPos = texture2D(backFaceTexture, backFaceTexCoord).xyz;
 
         //The front position is the world space position of the second render pass.
         vec3 frontPos = worldSpaceCoords;

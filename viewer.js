@@ -1,4 +1,4 @@
-var renderer, sceneFirstPass, scene, camera, clock, firstPassTexture, dataTexture, uniforms, attributes;
+var renderer, sceneBackFace, scene, camera, clock, backFaceTexture, dataTexture, uniforms, attributes;
 var stats;
 
 var video, videoImage, videoImageContext;
@@ -144,31 +144,31 @@ function initVis() {
     };
 
     /*** first pass ***/
-	var materialFirstPass = new THREE.ShaderMaterial( {
-        vertexShader: document.getElementById( 'vertexShaderFirstPass' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShaderFirstPass' ).textContent,
+	var materialbackFace = new THREE.ShaderMaterial( {
+        vertexShader: document.getElementById( 'vertexShaderBackFace' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShaderBackFace' ).textContent,
         side: THREE.BackSide
     });
 
-    var meshFirstPass = new THREE.Mesh( boxGeometry, materialFirstPass );
-    // meshFirstPass.rotation.x = -Math.PI/2;
+    var meshbackFace = new THREE.Mesh( boxGeometry, materialbackFace );
+    // meshbackFace.rotation.x = -Math.PI/2;
     
-    sceneFirstPass = new THREE.Scene();
-    sceneFirstPass.add( meshFirstPass );
+    sceneBackFace = new THREE.Scene();
+    sceneBackFace.add( meshbackFace );
 
     
     // get the "colour" coords we just made, as a texture
-    firstPassTexture = new THREE.WebGLRenderTarget(  window.innerWidth/downScaling,
+    backFaceTexture = new THREE.WebGLRenderTarget(  window.innerWidth/downScaling,
                                                      window.innerHeight/downScaling,
                                              { minFilter: THREE.NearestFilter,
                                                magFilter: THREE.NearestFilter,
                                                format: THREE.RGBFormat,
                                                type: THREE.FloatType } );
 
-    firstPassTexture.wrapS = firstPassTexture.wrapT = THREE.ClampToEdgeWrapping;    
+    backFaceTexture.wrapS = backFaceTexture.wrapT = THREE.ClampToEdgeWrapping;    
     
     /*** second pass ***/
-    uniforms = { firstPassTexture: { type: "t", value: firstPassTexture },
+    uniforms = { backFaceTexture: { type: "t", value: backFaceTexture },
                          dataTexture: { type: "t", value: dataTexture },
                          lightPosition: { type: "v3", value: light.position},
                          lightColor: { type: "v3", value: {x: light.color.r, y:light.color.g, z:light.color.b}},
@@ -282,7 +282,7 @@ function update() {
 
 function render() {
     //Render first pass and store the world space coords of the back face fragments into the texture.
-    renderer.render( sceneFirstPass, camera, firstPassTexture, true);
+    renderer.render( sceneBackFace, camera, backFaceTexture, true);
 
     if ( video.readyState === video.HAVE_ENOUGH_DATA ) 
     {
