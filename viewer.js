@@ -7,7 +7,7 @@ var nSteps = 81;
 var opacFac = 4.0;
 var alphaCorrection = opacFac/nSteps;
 var mipMapTex = true;
-var downScaling = 7;
+var downScaling = 5;
 var light;
 var play = true;
 
@@ -16,6 +16,8 @@ var now;
 var then = Date.now();
 var interval = 1000/fps;
 var delta;
+
+var g;
 
 initVis();
 initGUI();
@@ -80,6 +82,8 @@ function initGUI() {
 
     animationCtrlFolder = gui.addFolder("Animation");
     pPlay = animationCtrlFolder.add(animationParams, 'Pause');
+
+    gui.closed = true;
     
     // stats
     stats = new Stats();
@@ -93,12 +97,15 @@ function initVis() {
     clock = new THREE.Clock();
     
     /*** Camera ***/
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 1000);
-    camera.position.set(-1.0, -3.0, 1.5);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.rotation.order = "YXZ";
+    camera.position.set(2.0, 1.0, 2.0);
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     /*** light ***/
     light = new THREE.PointLight(0xFFFFFF);
-    light.position.set(0., 0., 20.);
+    // light.position.set(0.0, 20.0, 0.0);
+    light.position.set(20.0, 20.0, 20.0);
     light.intensity = 3;
 
     var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
@@ -109,10 +116,10 @@ function initVis() {
     dims = getDimensions(file);
 
     video = document.createElement( 'video' );
+    video.loop = true;
     video.id = 'video';
     video.type = ' video/ogg; codecs="theora, vorbis" ';
     video.src = file;
-    video.loop = true;
     video.load(); // must call after setting/changing source
     video.play();
     
@@ -144,6 +151,7 @@ function initVis() {
     });
 
     var meshFirstPass = new THREE.Mesh( boxGeometry, materialFirstPass );
+    // meshFirstPass.rotation.x = -Math.PI/2;
     
     sceneFirstPass = new THREE.Scene();
     sceneFirstPass.add( meshFirstPass );
@@ -181,16 +189,22 @@ function initVis() {
     
     scene = new THREE.Scene();
     var meshSecondPass = new THREE.Mesh( boxGeometry, materialSecondPass );
+    // meshSecondPass.rotation.x = Math.PI/2;
     scene.add( meshSecondPass );  
 
     /*************** Add map **************/
     var mapImage = THREE.ImageUtils.loadTexture("./res/uk.jpg");
     var mapMaterial = new THREE.MeshLambertMaterial({ map : mapImage });
-    var mapPlane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mapMaterial);
-    mapPlane.doubleSided = true;
-    mapPlane.position.z = -0.5;
-    // plane.rotation.z = 2;  // Not sure what this number represents.
+    var mapPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), mapMaterial);
+    mapPlane.rotation.x = -Math.PI / 2;
+    mapPlane.position.y = -0.5;
     scene.add(mapPlane);
+
+    /*************** add aquarium outline **/
+    var boxOutlineMesh = new THREE.Mesh( boxGeometry );
+    var boxOutLine = new THREE.BoxHelper( boxOutlineMesh );
+    boxOutLine.material.color.set( "#000033" );
+    scene.add( boxOutLine );
 
     /*************** Scene etc ************/
     renderer = new THREE.WebGLRenderer( { antialias: true} );
@@ -205,14 +219,9 @@ function initVis() {
     scene.add(light);
 
     // trackball controls
-    controls = new THREE.TrackballControls(camera, renderer.domElement);
-    controls.rotateSpeed = 1.0;
-    controls.zoomSpeed = 1.2;
-    controls.panSpeed = 1.0;
-    controls.dynamicDampingFactor = 0.3;
-    controls.staticMoving = false;
-    controls.noZoom = false;
-    controls.noPan = false;  
+    controls = new THREE.FirstPersonControls(camera, renderer.domElement);
+    controls.moveSpeed *= 0.0001;
+    controls.rotateSpeed *= 1.0;
 }
 
 /**
@@ -244,11 +253,12 @@ function getDimensions(filename) {
 
 function animate() {
     requestAnimationFrame(animate);
+    // console.log(camera.getWorldRotation());
 
     stats.begin();
     now = Date.now();
     delta = now - then;
-     
+    controls.update(delta);
     if (delta > interval) {
         // update time stuffs
         then = now - (delta % interval);
@@ -266,7 +276,7 @@ function update() {
     }else{
         video.pause();
     }
-    controls.update();
+    // controls.update();
 }
 
 
@@ -283,3 +293,27 @@ function render() {
     //Render the second pass and perform the volume rendering.
     renderer.render( scene, camera );
 }
+
+
+var debugaxis = function(axisLength){
+    //Shorten the vertex function
+    function v(x,y,z){ 
+            return new THREE.Vector3(x,y,z); 
+    }
+    
+    //Create axis (point1, point2, colour)
+    function createAxis(p1, p2, color){
+            var line, lineGeometry = new THREE.Geometry(),
+            lineMat = new THREE.LineBasicMaterial({color: color, lineWidth: 1});
+            lineGeometry.vertices.push(p1, p2);
+            line = new THREE.Line(lineGeometry, lineMat);
+            scene.add(line);
+    }
+    
+    createAxis(v(-axisLength, 0, 0), v(axisLength, 0, 0), 0xFF0000);
+    createAxis(v(0, -axisLength, 0), v(0, axisLength, 0), 0x00FF00);
+    createAxis(v(0, 0, -axisLength), v(0, 0, axisLength), 0x0000FF);
+};
+
+//To use enter the axis length
+debugaxis(1);
