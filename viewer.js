@@ -113,7 +113,7 @@ function initVis() {
     boxGeometry.doubleSided = true;
 
     /* video texture */
-    file = "./cloud_frac_623_812_70_4096_4096.ogv";
+    file = "./cloud_frac2_623_812_70_4096_4096.ogv";
     dims = getDimensions(file);
 
     video = document.createElement( 'video' );
