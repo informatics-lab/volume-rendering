@@ -4,7 +4,7 @@ var stats;
 var video, videoImage, videoImageContext;
 
 var nSteps = 81;
-var opacFac = 4.0;
+var opacFac = 2.0;
 var alphaCorrection = opacFac/nSteps;
 var mipMapTex = false;
 var downScaling = 10;
@@ -106,7 +106,7 @@ function initVis() {
     /*** light ***/
     light = new THREE.PointLight(0xFFFFFF);
     // light.position.set(0.0, 20.0, 0.0);
-    light.position.set(20.0, 20.0, 20.0);
+    light.position.set(0.0, 20.0, 0.0);
     light.intensity = 3;
 
     var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
