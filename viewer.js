@@ -5,7 +5,7 @@ var video, videoImage, videoImageContext;
 
 var nSteps = 81;
 var opacFac = 2.0;
-var alphaCorrection = opacFac/nSteps;
+var alphaCorrection = getAlphaCorrection(opacFac, nSteps);
 var mipMapTex = false;
 var downScaling = 10;
 var dirlight;
@@ -23,6 +23,26 @@ var dirLightIntensity = 3;
 initVis();
 initGUI();
 animate();
+
+
+function getAlphaCorrection(float opacFace, float nSteps){
+    return opacFac/nSteps
+}
+
+
+function setDataTexType(bool mipMapTex){
+    if (mipMapTex){
+            dataTexture.generateMipmaps = true;
+            dataTexture.magFilter = THREE.LinearFilter;
+            dataTexture.minFilter = THREE.LinearMipMapLinearFilter;
+    }else{
+            dataTexture.generateMipmaps = false;
+            dataTexture.magFilter = THREE.NearestFilter;
+            dataTexture.minFilter = THREE.NearestFilter;
+    };
+    dataTexture.needsUpdate = true;
+}
+
 
 function initGUI() {
     // dat.gui
@@ -44,29 +64,20 @@ function initGUI() {
     var pOpacFac = apperanceFolder.add(appearanceParams, 'Opacity factor');
     pOpacFac.onFinishChange(function(value){
         opacFac = value;
-        uniforms.alphaCorrection.value = opacFac/nSteps;
+        uniforms.alphaCorrection.value = getAlphaCorrection(opacFac, nSteps);
     });
 
     var pnSteps = apperanceFolder.add(appearanceParams, 'Number of steps');
     pnSteps.onChange(function(value){
         nSteps = value;
         uniforms.steps.value = nSteps;
-        uniforms.alphaCorrection.value = opacFac/nSteps;
+        uniforms.alphaCorrection.value = getAlphaCorrection(opacFac, nSteps);
     });
 
     var pMipMapTex = apperanceFolder.add(appearanceParams, 'Mip Map texture');
     pMipMapTex.onChange(function(value){
         mipMapTex = value;
-        if (mipMapTex){
-            dataTexture.generateMipmaps = true;
-            dataTexture.magFilter = THREE.LinearFilter;
-            dataTexture.minFilter = THREE.LinearMipMapLinearFilter;
-        }else{
-            dataTexture.generateMipmaps = false;
-            dataTexture.magFilter = THREE.NearestFilter;
-            dataTexture.minFilter = THREE.NearestFilter;
-        };
-        dataTexture.needsUpdate = true;
+        setDataTexType(mipMapTex);
     });
 
     var pDownScaling = apperanceFolder.add(appearanceParams, 'Downscaling');
@@ -134,15 +145,7 @@ function initVis() {
     videoImageContext.fillRect( 0, 0, videoImage.width, videoImage.height );
 
     dataTexture = new THREE.Texture( videoImage );
-    if (mipMapTex){
-        dataTexture.generateMipmaps = true;
-        dataTexture.magFilter = THREE.LinearFilter;
-        dataTexture.minFilter = THREE.LinearMipMapLinearFilter;
-    }else{
-        dataTexture.generateMipmaps = false;
-        dataTexture.magFilter = THREE.LinearFilter;
-        dataTexture.minFilter = THREE.LinearFilter;
-    };
+    setDataTexType(mipMapTex); // set mip mapping on or off
 
     /*** first pass ***/
 	var materialbackFace = new THREE.ShaderMaterial( {
