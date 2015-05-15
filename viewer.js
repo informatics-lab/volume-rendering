@@ -24,13 +24,14 @@ initVis();
 initGUI();
 animate();
 
+var g;
 
-function getAlphaCorrection(float opacFace, float nSteps){
-    return opacFac/nSteps
+function getAlphaCorrection(opacFace, nSteps){
+    return opacFac/nSteps;
 }
 
 
-function setDataTexType(bool mipMapTex){
+function setDataTexType(mipMapTex){
     if (mipMapTex){
             dataTexture.generateMipmaps = true;
             dataTexture.magFilter = THREE.LinearFilter;
@@ -42,7 +43,6 @@ function setDataTexType(bool mipMapTex){
     };
     dataTexture.needsUpdate = true;
 }
-
 
 function initGUI() {
     // dat.gui
@@ -81,12 +81,7 @@ function initGUI() {
     });
 
     var pDownScaling = apperanceFolder.add(appearanceParams, 'Downscaling');
-    pDownScaling.onChange(function(value){
-        downScaling = value;
-        rayMarchTexture
-        renderer.setSize(window.innerWidth/downScaling, window.innerHeight/downScaling);
-        renderer.domElement.style.cssText = "width: 100%;, height: 100%";
-    });
+    pDownScaling.value = downScaling;
 
     animationParams = {
         "Pause": function(){play = !play;
@@ -116,7 +111,7 @@ function initVis() {
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     /*** lights ***/
-    dirLight = new THREE.DirectionalLight(lightColor, lightIntensity);
+    dirLight = new THREE.DirectionalLight(lightColor, dirLightIntensity);
     dirLight.position.set(0.0, 20.0, 0.0);
     ambLight = new THREE.AmbientLight(lightColor);
 
@@ -172,7 +167,7 @@ function initVis() {
     uniforms = { backFaceTexture: { type: "t", value: backFaceTexture },
                          dataTexture: { type: "t", value: dataTexture },
                          lightPosition: { type: "v3", value: dirLight.position},
-                         lightColor: { type: "v3", value: {x: dirLight.color.r, y:light.color.g, z:light.color.b}},
+                         lightColor: { type: "v3", value: {x: dirLight.color.r, y:dirLight.color.g, z:dirLight.color.b}},
                          lightIntensity: {type: "1f", value: dirLight.intensity},
                          steps : {type: "1f" , value: nSteps}, // so we know how long to make in incriment 
                          alphaCorrection : {type: "1f" , value: alphaCorrection },
