@@ -8,7 +8,7 @@ var opacFac = 2.0;
 var alphaCorrection = opacFac/nSteps;
 var mipMapTex = false;
 var downScaling = 10;
-var light;
+var dirlight;
 var play = true;
 
 var fps = 10;
@@ -17,7 +17,8 @@ var then = Date.now();
 var interval = 1000/fps;
 var delta;
 
-var g;
+var lightColor = 0xFFFFFF;
+var dirLightIntensity = 3;
 
 initVis();
 initGUI();
@@ -103,11 +104,10 @@ function initVis() {
     camera.position.set(2.0, 1.0, 2.0);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-    /*** light ***/
-    light = new THREE.PointLight(0xFFFFFF);
-    // light.position.set(0.0, 20.0, 0.0);
-    light.position.set(0.0, 20.0, 0.0);
-    light.intensity = 3;
+    /*** lights ***/
+    dirLight = new THREE.DirectionalLight(lightColor, lightIntensity);
+    dirLight.position.set(0.0, 20.0, 0.0);
+    ambLight = new THREE.AmbientLight(lightColor);
 
     var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
     boxGeometry.doubleSided = true;
@@ -168,9 +168,9 @@ function initVis() {
     /*** second pass ***/
     uniforms = { backFaceTexture: { type: "t", value: backFaceTexture },
                          dataTexture: { type: "t", value: dataTexture },
-                         lightPosition: { type: "v3", value: light.position},
-                         lightColor: { type: "v3", value: {x: light.color.r, y:light.color.g, z:light.color.b}},
-                         lightIntensity: {type: "1f", value: light.intensity},
+                         lightPosition: { type: "v3", value: dirLight.position},
+                         lightColor: { type: "v3", value: {x: dirLight.color.r, y:light.color.g, z:light.color.b}},
+                         lightIntensity: {type: "1f", value: dirLight.intensity},
                          steps : {type: "1f" , value: nSteps}, // so we know how long to make in incriment 
                          alphaCorrection : {type: "1f" , value: alphaCorrection },
                          dataShape: {type: "v3", value: dims.datashape},
@@ -237,7 +237,8 @@ function initVis() {
     document.body.appendChild(renderer.domElement);
 
     // add light
-    scene.add(light);
+    scene.add(dirLight);
+    scene.add(ambLight); // currently doesn't do anything as it isn't passed to the shader.
 
     // trackball controls
     controls = new THREE.FirstPersonControls(camera, renderer.domElement);
