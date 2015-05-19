@@ -1,3 +1,5 @@
+CLOUD = "https://dl.dropboxusercontent.com/u/2665124/volume_rendering_data/";
+
 var renderer, sceneBackFace, sceneRayMarch, scene, camera, clock, backFaceTexture, dataTexture, uniforms, attributes;
 var stats;
 
@@ -119,7 +121,7 @@ function initVis() {
     boxGeometry.doubleSided = true;
 
     /* video texture */
-    file = "./cloud_frac2_623_812_70_4096_4096.ogv";
+    file = CLOUD+"cloud_frac2_623_812_70_4096_4096.ogv";
     dims = getDimensions(file);
 
     video = document.createElement( 'video' );
@@ -127,6 +129,7 @@ function initVis() {
     video.id = 'video';
     video.type = ' video/ogg; codecs="theora, vorbis" ';
     video.src = file;
+    video.crossOrigin = "Anonymous";
     video.load(); // must call after setting/changing source
     video.play();
     
@@ -211,7 +214,8 @@ function initVis() {
 
 
     /*************** Add map **************/
-    var mapImage = THREE.ImageUtils.loadTexture("./res/uk.jpg");
+    THREE.ImageUtils.crossOrigin = "";
+    var mapImage = THREE.ImageUtils.loadTexture(CLOUD+"uk.jpg");
     var mapMaterial = new THREE.MeshLambertMaterial({ map : mapImage });
     var mapPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), mapMaterial);
     mapPlane.rotation.x = -Math.PI / 2;
