@@ -24,6 +24,11 @@ var dirLightIntensity = 3;
 
 initVis();
 initGUI();
+alert("Welcome to our 'Weather Cubed' 3D weather demo\nThis software is at the very earliest\
+ stages of development. Here are all the caveats:\n* we only support Chrome\n* it may crash WebGL\
+in your browser\n* the data doesn't reflect the real weather\n* and it is very slooooow.\nOn the\
+ upside, there are lots of things you can help with if you want to! Just go to www.informaticslab.co.uk\
+  to find out more.");
 animate();
 
 var g;
