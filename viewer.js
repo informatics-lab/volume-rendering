@@ -9,7 +9,7 @@ var nSteps = 81;
 var opacFac = 2.0;
 var alphaCorrection = getAlphaCorrection(opacFac, nSteps);
 var mipMapTex = false;
-var downScaling = 10;
+var downScaling = 1;
 var dirlight;
 var play = true;
 
@@ -126,7 +126,7 @@ function initVis() {
     boxGeometry.doubleSided = true;
 
     /* video texture */
-    file = CLOUD+"cloud_frac2_623_812_70_4096_4096.ogv";
+    file = CLOUD+"datashadows_623_812_70_4096_4096.ogv";
     dims = getDimensions(file);
 
     video = document.createElement( 'video' );
@@ -174,13 +174,10 @@ function initVis() {
     /*** second pass ***/
     uniforms = { backFaceTexture: { type: "t", value: backFaceTexture },
                          dataTexture: { type: "t", value: dataTexture },
-                         lightPosition: { type: "v3", value: dirLight.position},
-                         lightColor: { type: "v3", value: {x: dirLight.color.r, y:dirLight.color.g, z:dirLight.color.b}},
-                         lightIntensity: {type: "1f", value: dirLight.intensity},
                          steps : {type: "1f" , value: nSteps}, // so we know how long to make in incriment 
                          alphaCorrection : {type: "1f" , value: alphaCorrection },
                          dataShape: {type: "v3", value: dims.datashape},
-                         textureShape: {type: "v2", value: dims.textureshape}
+                         texShape: {type: "v2", value: dims.textureshape}
                      };
 
     materialRayMarch = new THREE.ShaderMaterial( {
