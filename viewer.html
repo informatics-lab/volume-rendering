@@ -100,14 +100,30 @@
             datum = datumRGB.r;
         }else if (zTile == 1.0){
             datum = datumRGB.g;
-        }else if (zTile == 2.0){
+        }
+
+        return datum;
+    }
+
+    float getLightDatum(sampler2D tex, vec3 pos, vec3 dataShape, vec2 nTiles, float tilesPerLayer, vec2 tileDim, float thisTileN){
+        float zTile = floor(thisTileN/tilesPerLayer);
+        float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
+        float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
+        
+        vec2 thisPoint = vec2(xTile+pos.x, yTile+pos.z) * tileDim;
+
+        vec4 datumRGB = texture2D(tex, thisPoint);
+        float datum;
+        if (zTile == 0.0){
             datum = datumRGB.b;
+        }else if (zTile == 1.0){
+            datum = datumRGB.a;
         }
 
         return datum;
     }
  
-    float sampleAs3DTexture(sampler2D tex, vec3 pos, vec3 dataShape, vec2 texShape) {
+    vec2 sampleAs3DTexture(sampler2D tex, vec3 pos, vec3 dataShape, vec2 texShape) {
         /* 
         A function to reference a 2D RGBA texture which contains tiles 3D array data.
 
@@ -139,28 +155,34 @@
         float datumN = getDatum(tex, pos, dataShape, nTiles, tilesPerLayer, tileDim, thisTileN);
         float datumNp1 = getDatum(tex, pos, dataShape, nTiles, tilesPerLayer, tileDim, thisTileNp1);
 
+        float lightDatumN = getLightDatum(tex, pos, dataShape, nTiles, tilesPerLayer, tileDim, thisTileN);
+        float lightDatumNp1 = getDatum(tex, pos, dataShape, nTiles, tilesPerLayer, tileDim, thisTileNp1);
+
         float zDiff = mod((dataShape.z-1.0) * pos.y, 1.0);
 
-        return ((1.0 - zDiff) * datumN) + (zDiff * datumNp1);
+        float d = ((1.0 - zDiff) * datumN) + (zDiff * datumNp1);
+        float l = ((1.0 - zDiff) * lightDatumN) + (zDiff * lightDatumNp1);
+
+        return vec2(d,l);
     }
 
     vec4 getDataRGBAfromDatum(float datum){
         // pos.xyz = clamp(pos.xyz, 0.01,0.99);
-        float thisDatum = floor((datum * 16.0)+0.5) * 0.0625; // i.e. / 2^4
-        vec3 color = getDatumColor(thisDatum);
-        float alpha = getDatumAlpha(thisDatum);
+        //float thisDatum = floor((datum * 16.0)+0.5) * 0.0625; // i.e. / 2^4
+        vec3 color = getDatumColor(datum);
+        float alpha = getDatumAlpha(datum);
     
         return vec4(color.xyz, alpha);
     }
 
     vec4 getLightPathRGBAfromDatum(float datum){
         // pos.xyz = clamp(pos.xyz, 0.01,0.99);
-        float thisDatum = mod((datum * 256.0), 16.0) * 0.0625; // i.e / 2^4
+        //float thisDatum = mod((datum * 256.0), 16.0) * 0.0625; // i.e / 2^4
         // vec3 color = getDatumColor(datum);
-        float alpha = getDatumAlpha(thisDatum);
+        //float alpha = getDatumAlpha(thisDatum);
         //float alpha = thisDatum;
 
-        return vec4(alpha, alpha, alpha, alpha);
+        return vec4(datum);
     }
 
     vec4 getPathRGBA(vec3 startPos, vec3 endPos, float steps, sampler2D tex){
@@ -195,16 +217,20 @@
         vec4 lightRayRGBA;
         vec3 apparentRGB;
         float datum;
+        float lightDatum;
 
         //Perform the ray marching iterations
         for(int i = 0; i < MAX_STEPS; i++){
             //Get the voxel intensity value from the 3D texture.
-            datum = sampleAs3DTexture(tex, currentPosition, dataShape, texShape);
+            vec2 dl = sampleAs3DTexture(tex, currentPosition, dataShape, texShape);
+            datum = dl.x;
+            lightDatum = dl.y;
+
             dataRGBA = getDataRGBAfromDatum(datum);
-            lightPathRGBA = getLightPathRGBAfromDatum(datum);
+            lightPathRGBA = getLightPathRGBAfromDatum(lightDatum);
             lightRayRGBA = (vec4(1.0) - lightPathRGBA);// * vec4(1.0, 1.0, 1.0, 3.0);
 
-            apparentRGB = (1.0 - accumulatedAlpha) * dataRGBA.rgb * lightRayRGBA.rgb * dataRGBA.a * lightRayRGBA.a;
+            apparentRGB = (1.0 - accumulatedAlpha) * dataRGBA.rgb * lightRayRGBA.rgb * dataRGBA.a * lightRayRGBA.a * 3.0;
             //apparentRGB = (1.0 - accumulatedAlpha) * dataRGBA.rgb * dataRGBA.a * lightRayRGBA.a;
 
             //Perform the composition.
