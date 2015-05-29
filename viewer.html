@@ -61,7 +61,7 @@
     varying vec3 worldSpaceCoords;
     varying vec4 projectedCoords;
 
-    uniform sampler2D backFaceTexture, dataTexture; //i.e. tex and cubeTex
+    uniform sampler2D backFaceTexture, dataTexture, lightTexture; //i.e. tex and cubeTex
     uniform float steps;
     uniform float alphaCorrection;
 
@@ -101,29 +101,14 @@
         }else if (zTile == 1.0){
             datum = datumRGB.g;
         }
-
-        return datum;
-    }
-
-    float getLightDatum(sampler2D tex, vec3 pos, vec3 dataShape, vec2 nTiles, float tilesPerLayer, vec2 tileDim, float thisTileN){
-        float zTile = floor(thisTileN/tilesPerLayer);
-        float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
-        float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
-        
-        vec2 thisPoint = vec2(xTile+pos.x, yTile+pos.z) * tileDim;
-
-        vec4 datumRGB = texture2D(tex, thisPoint);
-        float datum;
-        if (zTile == 0.0){
+        else if (zTile == 2.0){
             datum = datumRGB.b;
-        }else if (zTile == 1.0){
-            datum = datumRGB.a;
         }
 
         return datum;
     }
  
-    vec2 sampleAs3DTexture(sampler2D tex, vec3 pos, vec3 dataShape, vec2 texShape) {
+    float sampleAs3DTexture(sampler2D tex, vec3 pos, vec3 dataShape, vec2 texShape) {
         /* 
         A function to reference a 2D RGBA texture which contains tiles 3D array data.
 
@@ -137,7 +122,7 @@
         */
 
         /* HACK HACKITY HACK*/
-        if (pos.x >= 623.0 || pos.y >= 812.0 || pos.z >= 70.0){
+        if (pos.x >= 623.0 || pos.y >= 812.0 || pos.z >= 59.0){
            return 0.0;
         }
         if (pos.x <= 0.0 || pos.y <= 0.0 || pos.z <= 0.0){
@@ -155,15 +140,11 @@
         float datumN = getDatum(tex, pos, dataShape, nTiles, tilesPerLayer, tileDim, thisTileN);
         float datumNp1 = getDatum(tex, pos, dataShape, nTiles, tilesPerLayer, tileDim, thisTileNp1);
 
-        float lightDatumN = getLightDatum(tex, pos, dataShape, nTiles, tilesPerLayer, tileDim, thisTileN);
-        float lightDatumNp1 = getDatum(tex, pos, dataShape, nTiles, tilesPerLayer, tileDim, thisTileNp1);
-
         float zDiff = mod((dataShape.z-1.0) * pos.y, 1.0);
 
         float d = ((1.0 - zDiff) * datumN) + (zDiff * datumNp1);
-        float l = ((1.0 - zDiff) * lightDatumN) + (zDiff * lightDatumNp1);
 
-        return vec2(d,l);
+        return d;
     }
 
     vec4 getDataRGBAfromDatum(float datum){
@@ -222,10 +203,8 @@
         //Perform the ray marching iterations
         for(int i = 0; i < MAX_STEPS; i++){
             //Get the voxel intensity value from the 3D texture.
-            vec2 dl = sampleAs3DTexture(tex, currentPosition, dataShape, texShape);
-            datum = dl.x;
-            lightDatum = dl.y;
-
+            float datum = sampleAs3DTexture(tex, currentPosition, dataShape, texShape);
+            float lightDatum = sampleAs3DTexture(lightTexture, currentPosition, dataShape, texShape);
             dataRGBA = getDataRGBAfromDatum(datum);
             lightPathRGBA = getLightPathRGBAfromDatum(lightDatum);
             lightRayRGBA = (vec4(1.0) - lightPathRGBA);// * vec4(1.0, 1.0, 1.0, 3.0);
