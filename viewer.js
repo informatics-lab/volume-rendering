@@ -128,6 +128,7 @@ function initVis() {
     /* video texture */
     //file = CLOUD+"datashadows_623_812_70_4096_4096.ogv";
     file = "datanshadows_623_812_59_4096_4096.ogv";
+    //file = "out_623_812_59_4096_4096.mp4";
     dims = getDimensions(file);
 
     video = document.createElement( 'video' );
@@ -140,6 +141,7 @@ function initVis() {
     //video.play();
     video.addEventListener('loadeddata', function() {
        // Video is loaded and can be played
+       video.autoplay = true;
        video.play();
     }, false);
     
