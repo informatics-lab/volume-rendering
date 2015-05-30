@@ -22,6 +22,8 @@ var delta;
 var lightColor = 0xFFFFFF;
 var dirLightIntensity = 3;
 
+var framesRendered = 0;
+
 initVis();
 initGUI();
 alert("Welcome to our 'Weather Cubed' 3D weather demo\nThis software is at the very earliest\
@@ -127,8 +129,8 @@ function initVis() {
 
     /* video texture */
     //file = CLOUD+"datashadows_623_812_70_4096_4096.ogv";
-    file = "datanshadows_623_812_59_4096_4096.ogv";
-    //file = "out_623_812_59_4096_4096.mp4";
+    //file = "datanshadows_623_812_59_4096_4096.ogv";
+    file = "out_623_812_59_4096_4096.webm";
     dims = getDimensions(file);
 
     video = document.createElement( 'video' );
@@ -138,12 +140,16 @@ function initVis() {
     video.src = file;
     video.crossOrigin = "Anonymous";
     video.load(); // must call after setting/changing source
+    video.playbackRate = 0.2;
     //video.play();
     video.addEventListener('loadeddata', function() {
        // Video is loaded and can be played
        video.autoplay = true;
        video.play();
-    }, false);
+    });
+    video.addEventListener('timeupdate', function() {
+        console.log('timeupdate: ', video.currentTime);
+    });
     
     //data video
     videoImage = document.createElement( 'canvas' );
@@ -334,7 +340,9 @@ function render() {
     //Render first pass and store the world space coords of the back face fragments into the texture.
     renderer.render( sceneBackFace, camera, backFaceTexture, true);
 
-    if ( video.readyState === video.HAVE_ENOUGH_DATA ) 
+    var stepTime = video.duration / 20.0;
+
+    if ( video.readyState === video.HAVE_ENOUGH_DATA && ((video.currentTime % stepTime) < 0.02 )) 
     {
         var w = videoImage.width;
         var h = videoImage.height;
@@ -345,6 +353,9 @@ function render() {
         videoImageLightContext.drawImage( video, w, 0, w, videoImage.height, 0, 0, w, videoImage.height );
         if ( lightTexture ) 
             lightTexture.needsUpdate = true;
+
+        framesRendered += 1;
+        console.log('Rendered ', framesRendered, video.duration);
     }
     //Render the second pass and perform the volume rendering.
     renderer.render( sceneRayMarch, camera, rayMarchTexture, true );
