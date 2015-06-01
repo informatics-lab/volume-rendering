@@ -350,7 +350,7 @@ function render() {
         if ( dataTexture ) 
             dataTexture.needsUpdate = true;
 
-        videoImageLightContext.drawImage( video, w, 0, w, videoImage.height, 0, 0, w, videoImage.height );
+        videoImageLightContext.drawImage( video, w, 0, w, h, 0, 0, w, h );
         if ( lightTexture ) 
             lightTexture.needsUpdate = true;
 
