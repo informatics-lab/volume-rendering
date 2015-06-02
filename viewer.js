@@ -13,7 +13,7 @@ var downScaling = 1;
 var dirlight;
 var play = true;
 
-var fps = 10;
+var fps = 20;
 var now;
 var then = Date.now();
 var interval = 1000/fps;
@@ -23,6 +23,7 @@ var lightColor = 0xFFFFFF;
 var dirLightIntensity = 3;
 
 var framesRendered = 0;
+var shrinkFactor = 16;
 
 initVis();
 initGUI();
@@ -45,10 +46,16 @@ function setDataTexType(mipMapTex){
             dataTexture.generateMipmaps = true;
             dataTexture.magFilter = THREE.LinearFilter;
             dataTexture.minFilter = THREE.LinearMipMapLinearFilter;
+            lightTexture.generateMipmaps = true;
+            lightTexture.magFilter = THREE.LinearFilter;
+            lightTexture.minFilter = THREE.LinearMipMapLinearFilter;
     }else{
             dataTexture.generateMipmaps = false;
             dataTexture.magFilter = THREE.NearestFilter;
             dataTexture.minFilter = THREE.NearestFilter;
+            lightTexture.generateMipmaps = false;
+            lightTexture.magFilter = THREE.NearestFilter;
+            lightTexture.minFilter = THREE.NearestFilter;
     };
     dataTexture.needsUpdate = true;
 }
@@ -153,8 +160,8 @@ function initVis() {
     
     //data video
     videoImage = document.createElement( 'canvas' );
-    videoImage.width = dims.textureshape.x;// / 2.0;
-    videoImage.height = dims.textureshape.y;
+    videoImage.width = dims.textureshape.x / shrinkFactor;// / 2.0;
+    videoImage.height = dims.textureshape.y / shrinkFactor;
 
     videoImageContext = videoImage.getContext( '2d' );
     // background color if no video present
@@ -163,8 +170,8 @@ function initVis() {
 
     //light video
     videoImageLight = document.createElement( 'canvas' );
-    videoImageLight.width = dims.textureshape.x;// / 2.0;
-    videoImageLight.height = dims.textureshape.y;
+    videoImageLight.width = dims.textureshape.x / shrinkFactor;// / 2.0;
+    videoImageLight.height = dims.textureshape.y / shrinkFactor;
 
     videoImageLightContext = videoImageLight.getContext( '2d' );
     // background color if no video present
@@ -172,12 +179,12 @@ function initVis() {
     videoImageLightContext.fillRect( 0, 0, videoImage.width, videoImage.height );
 
     dataTexture = new THREE.Texture( videoImage );
-    setDataTexType(mipMapTex); // set mip mapping on or off
 
     // var lightfile = 'lighting_new.png';
     // lightTexture = new THREE.ImageUtils.loadTexture(lightfile);
     lightTexture = new THREE.Texture( videoImageLight );
-    lightTexture.minFilter = THREE.NearestFilter;
+    setDataTexType(mipMapTex); // set mip mapping on or off
+    //lightTexture.minFilter = THREE.NearestFilter;
 
     /*** first pass ***/
 	var materialbackFace = new THREE.ShaderMaterial( {
@@ -314,16 +321,16 @@ function animate() {
     stats.begin();
     now = Date.now();
     delta = now - then;
-    controls.update(delta);
     if (delta > interval) {
+        controls.update(delta);
         // update time stuffs
         then = now - (delta % interval);
          
         //update();
         render();
-    }
 
-    stats.end();
+        stats.end();
+    }
 }
 
 function update() {
@@ -342,20 +349,20 @@ function render() {
 
     var stepTime = video.duration / 20.0;
 
-    if ( video.readyState === video.HAVE_ENOUGH_DATA && ((video.currentTime % stepTime) < 0.02 )) 
+    if ( video.readyState === video.HAVE_ENOUGH_DATA)// && ((video.currentTime % stepTime) < 0.02 )) 
     {
         var w = videoImage.width;
         var h = videoImage.height;
-        videoImageContext.drawImage( video, 0, 0, w, videoImage.height, 0, 0, w, videoImage.height );
+        videoImageContext.drawImage( video, 0, 0, w*shrinkFactor, videoImage.height*shrinkFactor, 0, 0, w, videoImage.height );
         if ( dataTexture ) 
             dataTexture.needsUpdate = true;
 
-        videoImageLightContext.drawImage( video, w, 0, w, h, 0, 0, w, h );
+        videoImageLightContext.drawImage( video, w*shrinkFactor, 0, w*shrinkFactor, h*shrinkFactor, 0, 0, w, h );
         if ( lightTexture ) 
             lightTexture.needsUpdate = true;
 
         framesRendered += 1;
-        console.log('Rendered ', framesRendered, video.duration);
+        //console.log('Rendered ', framesRendered, video.duration);
     }
     //Render the second pass and perform the volume rendering.
     renderer.render( sceneRayMarch, camera, rayMarchTexture, true );

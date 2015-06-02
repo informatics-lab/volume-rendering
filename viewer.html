@@ -121,15 +121,6 @@
             * texShape: the x,y dims of the tiles texture
         */
 
-        /* HACK HACKITY HACK*/
-        if (pos.x >= 623.0 || pos.y >= 812.0 || pos.z >= 59.0){
-           return 0.0;
-        }
-        if (pos.x <= 0.0 || pos.y <= 0.0 || pos.z <= 0.0){
-           return 0.0;
-        }
-        /* HACKING OFF */
-
         vec2 fracNTiles = texShape.xy / dataShape.xy;
         vec2 nTiles = vec2(floor(fracNTiles.x), floor(fracNTiles.y));
         float tilesPerLayer = nTiles.x * nTiles.y;
