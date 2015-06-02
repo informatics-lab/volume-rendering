@@ -13,7 +13,7 @@ var downScaling = 1;
 var dirlight;
 var play = true;
 
-var fps = 20;
+var fps = 60;
 var now;
 var then = Date.now();
 var interval = 1000/fps;
@@ -154,9 +154,9 @@ function initVis() {
        video.autoplay = true;
        video.play();
     });
-    video.addEventListener('timeupdate', function() {
-        console.log('timeupdate: ', video.currentTime);
-    });
+        // video.addEventListener('timeupdate', function() {
+        //     console.log('timeupdate: ', video.currentTime);
+        // });
     
     //data video
     videoImage = document.createElement( 'canvas' );
@@ -342,7 +342,7 @@ function update() {
     // controls.update();
 }
 
-
+var a,b,c,d;
 function render() {
     //Render first pass and store the world space coords of the back face fragments into the texture.
     renderer.render( sceneBackFace, camera, backFaceTexture, true);
@@ -353,13 +353,25 @@ function render() {
     {
         var w = videoImage.width;
         var h = videoImage.height;
+
+        // var date = new Date();
+        // var a = date.getTime();
         videoImageContext.drawImage( video, 0, 0, w*shrinkFactor, videoImage.height*shrinkFactor, 0, 0, w, videoImage.height );
         if ( dataTexture ) 
             dataTexture.needsUpdate = true;
+        // var dateb = new Date();
+        // var b = dateb.getTime();
 
+        // var datec = new Date();
+        // var c = datec.getTime();
         videoImageLightContext.drawImage( video, w*shrinkFactor, 0, w*shrinkFactor, h*shrinkFactor, 0, 0, w, h );
         if ( lightTexture ) 
             lightTexture.needsUpdate = true;
+        // var dated = new Date();
+        // d = dated.getTime();
+
+        // console.log("first:" + (b-a));
+        // console.log("second:" + (d-c));
 
         framesRendered += 1;
         //console.log('Rendered ', framesRendered, video.duration);
