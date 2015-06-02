@@ -101,7 +101,8 @@
     }
 
     float getDatum(sampler2D tex, vec3 pos, vec3 dataShape, vec2 nTiles, float tilesPerLayer, vec2 tileDim, float thisTileN){
-        float zTile = floor(thisTileN/tilesPerLayer);
+        //Add a small amount to avoid a floating point error
+        float zTile = floor((thisTileN/tilesPerLayer)+0.01);
         float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
         float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
         
