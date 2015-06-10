@@ -6,7 +6,7 @@ var stats;
 var video, videoImage, videoImageContext;
 
 var nSteps = 81;
-var opacFac = 2.0;
+var opacFac = 5.0;
 var alphaCorrection = getAlphaCorrection(opacFac, nSteps);
 var mipMapTex = false;
 var downScaling = 10;
