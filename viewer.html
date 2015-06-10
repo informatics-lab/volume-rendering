@@ -208,16 +208,17 @@
             //accumulatedColor += dataSample;
 
             //Store the alpha accumulated so far.
-            accumulatedAlpha += dataSample.a;
+            accumulatedAlpha += (1.0 - accumulatedAlpha) * dataSample.a;
         
             //Advance the ray.
             currentPosition += deltaDirection;
             accumulatedLength += deltaDirectionLength;
                       
             //If the length traversed is more than the ray length, or if the alpha accumulated reaches 1.0 then exit.
-            if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 ){
+            if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0){
                 break;
             }
+
         }
 
         if (accumulatedAlpha >= 1.0) {
@@ -274,7 +275,7 @@
             //Perform the composition.
             accumulatedColor += apparentRGB;
             //Store the alpha accumulated so far.
-            accumulatedAlpha += dataRGBA.a;
+            accumulatedAlpha += (1.0 - accumulatedAlpha) * dataRGBA.a;
 
             //Adva      nce the ray.
             currentPosition += deltaDirection;
@@ -284,6 +285,7 @@
             if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 ){
                 break;
             }
+
         }
 
         return vec4(accumulatedColor.xyz, accumulatedAlpha);
