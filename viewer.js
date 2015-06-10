@@ -5,7 +5,7 @@ var stats;
 
 var video, videoImage, videoImageContext;
 
-var nSteps = 81;
+var nSteps = 169;
 var opacFac = 2.0;
 var alphaCorrection = getAlphaCorrection(opacFac, nSteps);
 var mipMapTex = false;
@@ -348,6 +348,13 @@ function render() {
     renderer.render( sceneBackFace, camera, backFaceTexture, true);
 
     var stepTime = video.duration / 20.0;
+
+    var threshold = new THREE.Vector3(0.55, 0.55, 0.55);
+    threshold.min(camera.position);
+    console.log(camera.position);
+    if (threshold.equals(camera.position) && document.body.contains(renderer.domElement)) {
+        document.body.removeChild(renderer.domElement);
+    }
 
     if ( video.readyState === video.HAVE_ENOUGH_DATA)// && ((video.currentTime % stepTime) < 0.02 )) 
     {
