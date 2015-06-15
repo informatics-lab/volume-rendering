@@ -21,6 +21,19 @@ var then = Date.now();
 var interval = 1000/fps;
 var delta;
 
+var play_macro = false; // for camera macro
+var record_macro = false; // for camera macro
+var macro_frame = 0;
+var cameraMacro = []
+$.getJSON("cameraMacro.json", function(data){
+    for (i=0; i<data.length; i++){
+        var thispos = data[i].position;
+        var thisdir = data[i].direction;
+        cameraMacro.push({"position": new THREE.Vector3(thispos.x, thispos.y, thispos.z),
+                          "direction": new THREE.Quaternion(thisdir._x, thisdir._y, thisdir._z, thisdir._w)})
+    }
+});
+
 var lightColor = 0xFFFFFF;
 var dirLightIntensity = 3;
 
@@ -63,7 +76,6 @@ function initGUI() {
         width : 350
     });
 
-
     appearanceParams = {
         "Opacity factor": opacFac,
         "Number of steps": nSteps,
@@ -102,6 +114,23 @@ function initGUI() {
 
     animationCtrlFolder = gui.addFolder("Animation");
     pPlay = animationCtrlFolder.add(animationParams, 'Pause');
+
+    cameraParams = {
+        "Record macro": function(){record_macro = !record_macro;
+                             record_macro ? pRecordMacro.name("Pause") : pRecordMacro.name("Record");},
+        "Play back macro": function(){if (cameraMacro.length > 0){
+                                    play_macro = !play_macro;
+                                    play_macro ? pPlayMacro.name("Pause") : pPlayMacro.name("Play back")}
+                                ;},
+        "Clear macro": function(){cameraMacro=[];},
+        "Save macro": function(){localStorage["cameraMacro"] = cameraMacro;},
+    };
+
+    cameraFolder = gui.addFolder("Camera");
+    pRecordMacro = cameraFolder.add(cameraParams, 'Record macro');
+    pPlayMacro = cameraFolder.add(cameraParams, 'Play back macro');
+    pClearMacro = cameraFolder.add(cameraParams, 'Clear macro');
+    pSaveMacro = cameraFolder.add(cameraParams, 'Save macro');
 
     gui.closed = true;
     
@@ -273,9 +302,11 @@ function initVis() {
     scene.add(ambLight); // currently doesn't do anything as it isn't passed to the shader.
 
     // trackball controls
-    controls = new THREE.FirstPersonControls(camera, renderer.domElement);
-    controls.moveSpeed *= 0.0001;
-    controls.rotateSpeed *= 1.0;
+    controls = new THREE.OrbitControls(camera) 
+    controls.zoomSpeed *= 0.07;
+    // controls = new THREE.FirstPersonControls(camera, renderer.domElement);
+    // controls.moveSpeed *= 0.0001;
+    // controls.rotateSpeed *= 1.0;
 }
 
 /**
@@ -312,6 +343,7 @@ function animate() {
     stats.begin();
     now = Date.now();
     delta = now - then;
+    // controls.update(delta); // for fpscontrols
     if (delta > interval) {
         controls.update(delta);
         // update time stuffs
@@ -330,12 +362,27 @@ function update() {
     }else{
         video.pause();
     }
-    // controls.update();
+    controls.update();
+
+        /*** camera macros ***/
+    if (record_macro) {
+        cameraMacro.push({"position": camera.getWorldPosition(),
+                          "direction": camera.getWorldQuaternion()});
+    }
+
+    if (play_macro) {
+        this_pos = cameraMacro[macro_frame].position;
+        camera.position.set(this_pos.x, this_pos.y, this_pos.z);
+        camera.setRotationFromQuaternion(cameraMacro[macro_frame].direction);
+        camera.updateProjectionMatrix();
+
+        macro_frame < (cameraMacro.length-1) ? macro_frame++ : macro_frame=0;
+    }
 }
 
 var a,b,c,d;
 function render() {
-    //Render first pass and store the world space coords of the back face fragments into the texture.
+    // Render first pass and store the world space coords of the back face fragments into the texture.
     renderer.render( sceneBackFace, camera, backFaceTexture, true);
 
     var stepTime = video.duration / 20.0;
@@ -376,3 +423,5 @@ var debugaxis = function(axisLength){
     createAxis(v(0, -axisLength, 0), v(0, axisLength, 0), 0x00FF00);
     createAxis(v(0, 0, -axisLength), v(0, 0, axisLength), 0x0000FF);
 };
+
+debugaxis(1)
