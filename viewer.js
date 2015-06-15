@@ -349,13 +349,6 @@ function render() {
 
     var stepTime = video.duration / 20.0;
 
-    var threshold = new THREE.Vector3(0.55, 0.55, 0.55);
-    threshold.min(camera.position);
-    console.log(camera.position);
-    if (threshold.equals(camera.position) && document.body.contains(renderer.domElement)) {
-        document.body.removeChild(renderer.domElement);
-    }
-
     if ( video.readyState === video.HAVE_ENOUGH_DATA)// && ((video.currentTime % stepTime) < 0.02 )) 
     {
         var w = videoImage.width;
