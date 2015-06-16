@@ -131,8 +131,10 @@ function initVis() {
     dirLight.position.set(0.0, 20.0, 0.0);
     ambLight = new THREE.AmbientLight(lightColor);
 
-    var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
+    var boxDims = new THREE.Vector3(0.623, 0.59, 0.812);
+    var boxGeometry = new THREE.BoxGeometry(boxDims.x, boxDims.y, boxDims.z); // the block to render inside
     boxGeometry.doubleSided = true;
+    //boxGeometry.applyMatrix( new THREE.Matrix4().makeTranslation(0, (boxDims.y - 1) / 2, 0) );
 
     /* video texture */
     //file = CLOUD+"datashadows_623_812_70_4096_4096.ogv";
@@ -190,7 +192,8 @@ function initVis() {
 	var materialbackFace = new THREE.ShaderMaterial( {
         vertexShader: document.getElementById( 'vertexShaderBackFace' ).textContent,
         fragmentShader: document.getElementById( 'fragmentShaderBackFace' ).textContent,
-        side: THREE.BackSide
+        side: THREE.BackSide,
+        uniforms: {dimensions: {type: "v3", value: boxDims}}
     });
 
     var meshBackFace = new THREE.Mesh( boxGeometry, materialbackFace );
@@ -214,7 +217,8 @@ function initVis() {
                          steps : {type: "1f" , value: nSteps}, // so we know how long to make in incriment 
                          alphaCorrection : {type: "1f" , value: alphaCorrection },
                          dataShape: {type: "v3", value: dims.datashape},
-                         texShape: {type: "v2", value: dims.textureshape}
+                         texShape: {type: "v2", value: dims.textureshape},
+                         dimensions: {type: "v3", value: boxDims}
                      };
 
     materialRayMarch = new THREE.ShaderMaterial( {
@@ -258,7 +262,7 @@ function initVis() {
     var mapMaterial = new THREE.MeshLambertMaterial({ map : mapImage });
     var mapPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), mapMaterial);
     mapPlane.rotation.x = -Math.PI / 2;
-    mapPlane.position.y = -0.5;
+    mapPlane.position.y = -(boxDims.y / 2);
 
     scene.add(mapPlane);
 

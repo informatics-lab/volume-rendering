@@ -20,14 +20,17 @@
 <script id="vertexShaderBackFace" type="x-shader/x-vertex">
     varying vec3 worldSpaceCoords;
 
+    uniform vec3 dimensions;
+
     vec3 toLocal(vec3 p) {
-  		return p + vec3(0.5);
+  		return (p + (dimensions / 2.0)) * (1.0 / dimensions);
+        //return (p + vec3(1.0, 0.5, 0.5)) * vec3(0.5, 1.0, 1.0);
 	}
 
     void main(){
         //Set the world space coordinates of the back faces vertices as output.
         worldSpaceCoords = toLocal(position); //move it from [-0.5;0.5] to [0,1]
-        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position , 1.0 );
     }
 </script>
 
@@ -45,8 +48,11 @@
 	varying vec3 worldSpaceCoords;
 	varying vec4 projectedCoords;
 
+    uniform vec3 dimensions;
+
 	vec3 toLocal(vec3 p) {
-  		return p + vec3(0.5);
+        return (p + (dimensions / 2.0)) * (1.0 / dimensions);
+  		//return (p + vec3(1.0, 0.5, 0.5)) * vec3(0.5, 1.0, 1.0);
 	}
 	
 	void main()
