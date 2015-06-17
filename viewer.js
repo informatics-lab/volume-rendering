@@ -260,7 +260,7 @@ function initVis() {
     THREE.ImageUtils.crossOrigin = "";
     var mapImage = THREE.ImageUtils.loadTexture(CLOUD+"uk.jpg");
     var mapMaterial = new THREE.MeshLambertMaterial({ map : mapImage });
-    var mapPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), mapMaterial);
+    var mapPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.623, 0.812), mapMaterial);
     mapPlane.rotation.x = -Math.PI / 2;
     mapPlane.position.y = -(boxDims.y / 2);
 
