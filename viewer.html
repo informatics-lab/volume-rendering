@@ -106,8 +106,12 @@
         return datum * alphaCorrection;
     }
 
+    float safeFloor(float val) {
+        return floor(val + 0.01);
+    }
+
     float getDatum(sampler2D tex, vec3 pos, vec3 dataShape, vec2 nTiles, float tilesPerLayer, vec2 tileDim, float thisTileN){
-        float zTile = floor((thisTileN/tilesPerLayer) + 0.01);
+        float zTile = safeFloor(thisTileN/tilesPerLayer);
         float yTile = floor((thisTileN - (zTile * tilesPerLayer)) / nTiles.x);
         float xTile = mod((thisTileN - (zTile * tilesPerLayer)), nTiles.x);
         
