@@ -130,7 +130,6 @@ function initVis() {
     dirLight = new THREE.DirectionalLight(lightColor, dirLightIntensity);
     dirLight.position.set(0.0, 20.0, 0.0);
     ambLight = new THREE.AmbientLight(lightColor);
-    var ambience = 0.3;
 
     var boxDims = new THREE.Vector3(0.623, 0.59, 0.812);
     var boxGeometry = new THREE.BoxGeometry(boxDims.x, boxDims.y, boxDims.z); // the block to render inside
@@ -215,12 +214,8 @@ function initVis() {
     uniforms = { backFaceTexture: { type: "t", value: backFaceTexture },
                          dataTexture: { type: "t", value: dataTexture },
                          lightTexture: {type: "t", value: lightTexture },
-                         lightPosition: { type: "v3", value: dirLight.position},
-                         lightColor: { type: "v3", value: {x: dirLight.color.r, y:dirLight.color.g, z:dirLight.color.b}},
-                         lightIntensity: {type: "1f", value: dirLight.intensity},
                          steps : {type: "1f" , value: nSteps}, // so we know how long to make in incriment 
                          alphaCorrection : {type: "1f" , value: alphaCorrection },
-                         ambience : {type: "1f", value: ambience},
                          dataShape: {type: "v3", value: dims.datashape},
                          texShape: {type: "v2", value: dims.textureshape},
                          dimensions: {type: "v3", value: boxDims}
