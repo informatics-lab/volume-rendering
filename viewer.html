@@ -88,6 +88,7 @@
                         lightIntensity);
 
     const int MAX_STEPS = 64;
+    const int MAX_SHADE_STEPS = 16;
 
     vec3 toLocal(vec3 p) {
         // changes from clip coords (-0.5 -> 0.5) to local coords(0->1)
@@ -204,7 +205,7 @@
         vec4 dataSample;
         float alphaSample;
         //Perform the ray marching iterations
-        for(int i = 0; i < MAX_STEPS; i++){
+        for(int i = 0; i < MAX_SHADE_STEPS; i++){
             //Get the voxel intensity value from the 3D texture.    
             dataSample = getDataRGBA(tex, currentPosition, dataShape, texShape);
             //Perform the composition.
@@ -281,7 +282,7 @@
 
             lightRayRGBA = (vec4(1.0) - lightPathRGBA);// * vec4(1.0, 1.0, 1.0, 3.0);
 
-            apparentRGB = (1.0 - accumulatedAlpha) * dataRGBA.rgb * lightRayRGBA.rgb * dataRGBA.a * lightRayRGBA.a * 2.0;
+            apparentRGB = (1.0 - accumulatedAlpha) * dataRGBA.rgb * lightRayRGBA.rgb * dataRGBA.a * lightRayRGBA.a * 1.5;
 
             //Perform the composition.
             accumulatedColor += apparentRGB;

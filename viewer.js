@@ -6,8 +6,8 @@ var stats;
 var video, videoImage, videoImageContext;
 
 var nSteps = 64;
-var shadeSteps = 32;
-var opacFac = 2.0;
+var shadeSteps = 16;
+var opacFac = 3.0;
 var alphaCorrection = getAlphaCorrection(opacFac, nSteps);
 var mipMapTex = false;
 var downScaling = 1;
@@ -25,7 +25,7 @@ var lightColor = 0xFFFFFF;
 var dirLightIntensity = 3;
 
 var framesRendered = 0;
-var shrinkFactor = 4;
+var shrinkFactor = 1;
 
 initVis();
 initGUI();
@@ -132,7 +132,8 @@ function initVis() {
     boxGeometry.doubleSided = true;
 
     /* video texture */
-    file = "out_623_812_59_4096_4096.webm";
+    //file = "out_623_812_59_4096_4096.webm";
+    file = "out_400_400_35_256_4096.ogv";
     dims = getDimensions(file);
 
     video = document.createElement( 'video' );
@@ -155,6 +156,7 @@ function initVis() {
     
     //data video
     videoImage = document.createElement( 'canvas' );
+    //document.body.appendChild(videoImage);
     videoImage.width = dims.textureshape.x / shrinkFactor;// / 2.0;
     videoImage.height = dims.textureshape.y / shrinkFactor;
 
@@ -200,7 +202,7 @@ function initVis() {
                          alphaCorrection : {type: "1f" , value: alphaCorrection },
                          ambience : {type: "1f", value: ambience},
                          dataShape: {type: "v3", value: dims.datashape},
-                         texShape: {type: "v2", value: dims.textureshape},
+                         texShape: {type: "v2", value: dims.textureshape * 100.0},
                          dimensions: {type: "v3", value: boxDims}
                      };
 
