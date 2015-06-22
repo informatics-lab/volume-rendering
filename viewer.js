@@ -1,17 +1,19 @@
 CLOUD = "https://dl.dropboxusercontent.com/u/2665124/volume_rendering_data/";
 
-var renderer, sceneBackFace, sceneRayMarch, scene, camera, clock, backFaceTexture, dataTexture, lightTexture, uniforms, attributes;
+var renderer, sceneBackFace, sceneRayMarch, scene, camera, clock, backFaceTexture, dataTexture, uniforms, attributes;
 var stats;
 
 var video, videoImage, videoImageContext;
 
-var nSteps = 169;
+var nSteps = 64;
+var shadeSteps = 32;
 var opacFac = 2.0;
 var alphaCorrection = getAlphaCorrection(opacFac, nSteps);
 var mipMapTex = false;
 var downScaling = 1;
 var dirlight;
 var play = true;
+var ambience = 0.1;
 
 var fps = 60;
 var now;
@@ -23,7 +25,7 @@ var lightColor = 0xFFFFFF;
 var dirLightIntensity = 3;
 
 var framesRendered = 0;
-var shrinkFactor = 16;
+var shrinkFactor = 8;
 
 initVis();
 initGUI();
@@ -46,16 +48,16 @@ function setDataTexType(mipMapTex){
             dataTexture.generateMipmaps = true;
             dataTexture.magFilter = THREE.LinearFilter;
             dataTexture.minFilter = THREE.LinearMipMapLinearFilter;
-            lightTexture.generateMipmaps = true;
-            lightTexture.magFilter = THREE.LinearFilter;
-            lightTexture.minFilter = THREE.LinearMipMapLinearFilter;
+            // lightTexture.generateMipmaps = true;
+            // lightTexture.magFilter = THREE.LinearFilter;
+            // lightTexture.minFilter = THREE.LinearMipMapLinearFilter;
     }else{
             dataTexture.generateMipmaps = false;
             dataTexture.magFilter = THREE.NearestFilter;
             dataTexture.minFilter = THREE.NearestFilter;
-            lightTexture.generateMipmaps = false;
-            lightTexture.magFilter = THREE.NearestFilter;
-            lightTexture.minFilter = THREE.NearestFilter;
+            // lightTexture.generateMipmaps = false;
+            // lightTexture.magFilter = THREE.NearestFilter;
+            // lightTexture.minFilter = THREE.NearestFilter;
     };
     dataTexture.needsUpdate = true;
 }
@@ -130,7 +132,6 @@ function initVis() {
     dirLight = new THREE.DirectionalLight(lightColor, dirLightIntensity);
     dirLight.position.set(0.0, 20.0, 0.0);
     ambLight = new THREE.AmbientLight(lightColor);
-    var ambience = 0.3;
 
     var boxDims = new THREE.Vector3(0.623, 0.59, 0.812);
     var boxGeometry = new THREE.BoxGeometry(boxDims.x, boxDims.y, boxDims.z); // the block to render inside
@@ -172,20 +173,20 @@ function initVis() {
     videoImageContext.fillRect( 0, 0, videoImage.width, videoImage.height );
 
     //light video
-    videoImageLight = document.createElement( 'canvas' );
-    videoImageLight.width = dims.textureshape.x / shrinkFactor;// / 2.0;
-    videoImageLight.height = dims.textureshape.y / shrinkFactor;
+    // videoImageLight = document.createElement( 'canvas' );
+    // videoImageLight.width = dims.textureshape.x / shrinkFactor;// / 2.0;
+    // videoImageLight.height = dims.textureshape.y / shrinkFactor;
 
-    videoImageLightContext = videoImageLight.getContext( '2d' );
-    // background color if no video present
-    videoImageLightContext.fillStyle = '#000000';
-    videoImageLightContext.fillRect( 0, 0, videoImage.width, videoImage.height );
+    // videoImageLightContext = videoImageLight.getContext( '2d' );
+    // // background color if no video present
+    // videoImageLightContext.fillStyle = '#000000';
+    // videoImageLightContext.fillRect( 0, 0, videoImage.width, videoImage.height );
 
     dataTexture = new THREE.Texture( videoImage );
 
     // var lightfile = 'lighting_new.png';
     // lightTexture = new THREE.ImageUtils.loadTexture(lightfile);
-    lightTexture = new THREE.Texture( videoImageLight );
+    // lightTexture = new THREE.Texture( videoImageLight );
     setDataTexType(mipMapTex); // set mip mapping on or off
     //lightTexture.minFilter = THREE.NearestFilter;
 
@@ -214,11 +215,12 @@ function initVis() {
     /*** second pass ***/
     uniforms = { backFaceTexture: { type: "t", value: backFaceTexture },
                          dataTexture: { type: "t", value: dataTexture },
-                         lightTexture: {type: "t", value: lightTexture },
+                         // lightTexture: {type: "t", value: lightTexture },
                          lightPosition: { type: "v3", value: dirLight.position},
                          lightColor: { type: "v3", value: {x: dirLight.color.r, y:dirLight.color.g, z:dirLight.color.b}},
                          lightIntensity: {type: "1f", value: dirLight.intensity},
                          steps : {type: "1f" , value: nSteps}, // so we know how long to make in incriment 
+                         shadeSteps : {type: "1f" , value: nSteps},
                          alphaCorrection : {type: "1f" , value: alphaCorrection },
                          ambience : {type: "1f", value: ambience},
                          dataShape: {type: "v3", value: dims.datashape},
@@ -373,9 +375,9 @@ function render() {
 
         // var datec = new Date();
         // var c = datec.getTime();
-        videoImageLightContext.drawImage( video, w*shrinkFactor, 0, w*shrinkFactor, h*shrinkFactor, 0, 0, w, h );
-        if ( lightTexture ) 
-            lightTexture.needsUpdate = true;
+        // videoImageLightContext.drawImage( video, w*shrinkFactor, 0, w*shrinkFactor, h*shrinkFactor, 0, 0, w, h );
+        // if ( lightTexture ) 
+        //     lightTexture.needsUpdate = true;
         // var dated = new Date();
         // d = dated.getTime();
 
