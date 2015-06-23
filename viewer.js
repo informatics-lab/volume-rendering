@@ -349,7 +349,7 @@ function animate() {
         // update time stuffs
         then = now - (delta % interval);
          
-        //update();
+        update();
         render();
 
         stats.end();
@@ -424,4 +424,4 @@ var debugaxis = function(axisLength){
     createAxis(v(0, 0, -axisLength), v(0, 0, axisLength), 0x0000FF);
 };
 
-debugaxis(1)
+//debugaxis(1)
