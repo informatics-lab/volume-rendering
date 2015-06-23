@@ -213,6 +213,7 @@
             //accumulatedColor += dataSample;
             //Store the alpha accumulated so far.
             accumulatedAlpha += (1.0 - accumulatedAlpha) * dataSample.a;
+            //accumulatedAlpha += dataSample.a;
         
             //Advance the ray.
             currentPosition += deltaDirection;
@@ -287,7 +288,8 @@
             //Perform the composition.
             accumulatedColor += apparentRGB;
             //Store the alpha accumulated so far.
-            accumulatedAlpha += (1.0 - accumulatedAlpha) * dataRGBA.a;
+            accumulatedAlpha += pow((1.0 - accumulatedAlpha), 0.5) * dataRGBA.a;
+            //accumulatedAlpha += dataRGBA.a;
 
             //Adva      nce the ray.
             currentPosition += deltaDirection;

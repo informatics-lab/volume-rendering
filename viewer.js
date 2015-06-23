@@ -7,13 +7,13 @@ var video, videoImage, videoImageContext;
 
 var nSteps = 64;
 var shadeSteps = 16;
-var opacFac = 3.0;
+var opacFac = 4.0;
 var alphaCorrection = getAlphaCorrection(opacFac, nSteps);
 var mipMapTex = false;
 var downScaling = 1;
 var dirlight;
 var play = true;
-var ambience = 0.1;
+var ambience = 0.3;
 
 var fps = 60;
 var now;
@@ -133,7 +133,8 @@ function initVis() {
 
     /* video texture */
     //file = "out_623_812_59_4096_4096.webm";
-    file = "out_400_400_35_256_4096.ogv";
+    //file = "datanshadows_623_812_59_4096_4096.ogv"
+    file = "out_251_325_34_256_4096.ogv";
     dims = getDimensions(file);
 
     video = document.createElement( 'video' );
@@ -143,7 +144,7 @@ function initVis() {
     video.src = file;
     video.crossOrigin = "Anonymous";
     video.load(); // must call after setting/changing source
-    video.playbackRate = 0.2;
+    video.playbackRate = 1;
     //video.play();
     video.addEventListener('loadeddata', function() {
        // Video is loaded and can be played
@@ -166,6 +167,7 @@ function initVis() {
     videoImageContext.fillRect( 0, 0, videoImage.width, videoImage.height );
 
     dataTexture = new THREE.Texture( videoImage );
+    //dataTexture.flipY = false;
 
     setDataTexType(mipMapTex); // set mip mapping on or off
 
@@ -202,7 +204,7 @@ function initVis() {
                          alphaCorrection : {type: "1f" , value: alphaCorrection },
                          ambience : {type: "1f", value: ambience},
                          dataShape: {type: "v3", value: dims.datashape},
-                         texShape: {type: "v2", value: dims.textureshape * 100.0},
+                         texShape: {type: "v2", value: dims.textureshape},
                          dimensions: {type: "v3", value: boxDims}
                      };
 
