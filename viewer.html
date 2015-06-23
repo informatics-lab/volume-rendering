@@ -25,7 +25,8 @@
     uniform vec3 dimensions;
 
     vec3 toLocal(vec3 p) {
-        return (p + (dimensions / 2.0)) * (1.0 / dimensions);
+        vec3 pos = (p + (dimensions / 2.0)) * (1.0 / dimensions);
+        return vec3(pos.xy, 1.0 - pos.z);
 	}
 
     void main(){
@@ -52,7 +53,8 @@
     uniform vec3 dimensions;
 
 	vec3 toLocal(vec3 p) {
-        return (p + (dimensions / 2.0)) * (1.0 / dimensions);
+        vec3 pos = (p + (dimensions / 2.0)) * (1.0 / dimensions);
+        return vec3(pos.xy, 1.0 - pos.z);
 	}
 	
 	void main()
@@ -283,7 +285,7 @@
             lightPathRGBA = getLightPathRGBA(currentPosition, light.position, shadeSteps, tex);
 
 
-            lightRayRGBA = (vec4(1.0) - lightPathRGBA);// * vec4(1.0, 1.0, 1.0, 3.0);
+            lightRayRGBA = (vec4(1.0) - lightPathRGBA) * 2.0;// * vec4(1.0, 1.0, 1.0, 3.0);
 
             apparentRGB = (1.0 - accumulatedAlpha) * dataRGBA.rgb * lightRayRGBA.rgb * dataRGBA.a * lightRayRGBA.a * 1.5;
 
@@ -348,7 +350,7 @@
     }
 </script>
 
-
+<script src="map_utils.js"></script>
 <script src="viewer.js"></script>
 </body>
 </html>

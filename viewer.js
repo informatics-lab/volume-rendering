@@ -156,15 +156,24 @@ function initVis() {
     dirLight.position.set(0.0, 20.0, 0.0);
     ambLight = new THREE.AmbientLight(lightColor);
 
-    var boxDims = new THREE.Vector3(0.623, 0.59, 0.812);
-    var boxGeometry = new THREE.BoxGeometry(boxDims.x, boxDims.y, boxDims.z); // the block to render inside
-    boxGeometry.doubleSided = true;
+    // var boxDims = new THREE.Vector3(0.623, 0.59, 0.812);
+    // var boxGeometry = new THREE.BoxGeometry(boxDims.x, boxDims.y, boxDims.z); // the block to render inside
+    // boxGeometry.doubleSided = true;
 
     /* video texture */
     //file = "out_623_812_59_4096_4096.webm";
     //file = "datanshadows_623_812_59_4096_4096.ogv"
-    file = "out_251_325_34_256_4096.ogv";
-    dims = getDimensions(file);
+    //file = "out_251_325_34_256_4096.ogv";
+    // file = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/55896829e4b0b14cba17273c/data";
+    // dims = getDimensions("out_251_327_34_256_4096.ogv");
+    file = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/5589758be4b0b14cba172762/data";
+    dims = getDimensions("out_345_449_54_512_8192.ogv");
+
+    // var boxDims = new THREE.Vector3(0.345, 0.54, 0.447);
+    var ds = dims.datashape;
+    var boxDims = new THREE.Vector3(ds.x*0.001, ds.z*0.01, ds.y*0.001);
+    var boxGeometry = new THREE.BoxGeometry(boxDims.x, boxDims.y, boxDims.z); // the block to render inside
+    boxGeometry.doubleSided = true;
 
     video = document.createElement( 'video' );
     video.loop = true;
@@ -273,14 +282,13 @@ function initVis() {
 
 
     /*************** Add map **************/
-    THREE.ImageUtils.crossOrigin = "";
-    var mapImage = THREE.ImageUtils.loadTexture(CLOUD+"uk.jpg");
-    var mapMaterial = new THREE.MeshLambertMaterial({ map : mapImage });
-    var mapPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.623, 0.812), mapMaterial);
-    mapPlane.rotation.x = -Math.PI / 2;
-    mapPlane.position.y = -(boxDims.y / 2);
-
-    scene.add(mapPlane);
+    callback = function(land){
+        land.position.set(0.0, -5.295, 0.0);
+        //land.position.set(0.0, 0.0, 0.0);
+        //land.rotation.x = Math.PI / 2;
+        scene.add(land);
+    };
+    getLand(callback, 0.623, 0.812);
 
     /*************** add aquarium outline **/
     var boxOutlineMesh = new THREE.Mesh( boxGeometry );
@@ -424,4 +432,4 @@ var debugaxis = function(axisLength){
     createAxis(v(0, 0, -axisLength), v(0, 0, axisLength), 0x0000FF);
 };
 
-//debugaxis(1)
+debugaxis(1)
