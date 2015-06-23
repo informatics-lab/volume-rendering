@@ -5,15 +5,17 @@ var stats;
 
 var video, videoImage, videoImageContext;
 
-var nSteps = 81;
-var opacFac = 2.0;
+var nSteps = 64;
+var shadeSteps = 16;
+var opacFac = 4.0;
 var alphaCorrection = getAlphaCorrection(opacFac, nSteps);
 var mipMapTex = false;
-var downScaling = 10;
+var downScaling = 1;
 var dirlight;
 var play = true;
+var ambience = 0.3;
 
-var fps = 10;
+var fps = 60;
 var now;
 var then = Date.now();
 var interval = 1000/fps;
@@ -21,6 +23,9 @@ var delta;
 
 var lightColor = 0xFFFFFF;
 var dirLightIntensity = 3;
+
+var framesRendered = 0;
+var shrinkFactor = 1;
 
 initVis();
 initGUI();
@@ -122,11 +127,14 @@ function initVis() {
     dirLight.position.set(0.0, 20.0, 0.0);
     ambLight = new THREE.AmbientLight(lightColor);
 
-    var boxGeometry = new THREE.BoxGeometry(1.0, 1.0, 1.0); // the block to render inside
+    var boxDims = new THREE.Vector3(0.623, 0.59, 0.812);
+    var boxGeometry = new THREE.BoxGeometry(boxDims.x, boxDims.y, boxDims.z); // the block to render inside
     boxGeometry.doubleSided = true;
 
     /* video texture */
-    file = CLOUD+"cloud_frac2_623_812_70_4096_4096.ogv";
+    //file = "out_623_812_59_4096_4096.webm";
+    //file = "datanshadows_623_812_59_4096_4096.ogv"
+    file = "out_251_325_34_256_4096.ogv";
     dims = getDimensions(file);
 
     video = document.createElement( 'video' );
@@ -136,11 +144,22 @@ function initVis() {
     video.src = file;
     video.crossOrigin = "Anonymous";
     video.load(); // must call after setting/changing source
-    video.play();
+    video.playbackRate = 1;
+    //video.play();
+    video.addEventListener('loadeddata', function() {
+       // Video is loaded and can be played
+       video.autoplay = true;
+       video.play();
+    });
+        // video.addEventListener('timeupdate', function() {
+        //     console.log('timeupdate: ', video.currentTime);
+        // });
     
+    //data video
     videoImage = document.createElement( 'canvas' );
-    videoImage.width = dims.textureshape.x;
-    videoImage.height = dims.textureshape.y;
+    //document.body.appendChild(videoImage);
+    videoImage.width = dims.textureshape.x / shrinkFactor;// / 2.0;
+    videoImage.height = dims.textureshape.y / shrinkFactor;
 
     videoImageContext = videoImage.getContext( '2d' );
     // background color if no video present
@@ -148,13 +167,16 @@ function initVis() {
     videoImageContext.fillRect( 0, 0, videoImage.width, videoImage.height );
 
     dataTexture = new THREE.Texture( videoImage );
+    //dataTexture.flipY = false;
+
     setDataTexType(mipMapTex); // set mip mapping on or off
 
     /*** first pass ***/
 	var materialbackFace = new THREE.ShaderMaterial( {
         vertexShader: document.getElementById( 'vertexShaderBackFace' ).textContent,
         fragmentShader: document.getElementById( 'fragmentShaderBackFace' ).textContent,
-        side: THREE.BackSide
+        side: THREE.BackSide,
+        uniforms: {dimensions: {type: "v3", value: boxDims}}
     });
 
     var meshBackFace = new THREE.Mesh( boxGeometry, materialbackFace );
@@ -178,9 +200,12 @@ function initVis() {
                          lightColor: { type: "v3", value: {x: dirLight.color.r, y:dirLight.color.g, z:dirLight.color.b}},
                          lightIntensity: {type: "1f", value: dirLight.intensity},
                          steps : {type: "1f" , value: nSteps}, // so we know how long to make in incriment 
+                         shadeSteps : {type: "1f" , value: shadeSteps},
                          alphaCorrection : {type: "1f" , value: alphaCorrection },
+                         ambience : {type: "1f", value: ambience},
                          dataShape: {type: "v3", value: dims.datashape},
-                         textureShape: {type: "v2", value: dims.textureshape}
+                         texShape: {type: "v2", value: dims.textureshape},
+                         dimensions: {type: "v3", value: boxDims}
                      };
 
     materialRayMarch = new THREE.ShaderMaterial( {
@@ -222,9 +247,9 @@ function initVis() {
     THREE.ImageUtils.crossOrigin = "";
     var mapImage = THREE.ImageUtils.loadTexture(CLOUD+"uk.jpg");
     var mapMaterial = new THREE.MeshLambertMaterial({ map : mapImage });
-    var mapPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), mapMaterial);
+    var mapPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.623, 0.812), mapMaterial);
     mapPlane.rotation.x = -Math.PI / 2;
-    mapPlane.position.y = -0.5;
+    mapPlane.position.y = -(boxDims.y / 2);
 
     scene.add(mapPlane);
 
@@ -287,16 +312,16 @@ function animate() {
     stats.begin();
     now = Date.now();
     delta = now - then;
-    controls.update(delta);
     if (delta > interval) {
+        controls.update(delta);
         // update time stuffs
         then = now - (delta % interval);
          
-        update();
+        //update();
         render();
-    }
 
-    stats.end();
+        stats.end();
+    }
 }
 
 function update() {
@@ -308,16 +333,23 @@ function update() {
     // controls.update();
 }
 
-
+var a,b,c,d;
 function render() {
     //Render first pass and store the world space coords of the back face fragments into the texture.
     renderer.render( sceneBackFace, camera, backFaceTexture, true);
 
-    if ( video.readyState === video.HAVE_ENOUGH_DATA ) 
+    var stepTime = video.duration / 20.0;
+
+    if ( video.readyState === video.HAVE_ENOUGH_DATA)// && ((video.currentTime % stepTime) < 0.02 )) 
     {
-        videoImageContext.drawImage( video, 0, 0 );
+        var w = videoImage.width;
+        var h = videoImage.height;
+
+        videoImageContext.drawImage( video, 0, 0, w*shrinkFactor, videoImage.height*shrinkFactor, 0, 0, w, videoImage.height );
         if ( dataTexture ) 
             dataTexture.needsUpdate = true;
+
+        framesRendered += 1;
     }
     //Render the second pass and perform the volume rendering.
     renderer.render( sceneRayMarch, camera, rayMarchTexture, true );
