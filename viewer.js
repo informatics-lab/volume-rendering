@@ -156,20 +156,15 @@ function initVis() {
     dirLight.position.set(0.0, 20.0, 0.0);
     ambLight = new THREE.AmbientLight(lightColor);
 
-    // var boxDims = new THREE.Vector3(0.623, 0.59, 0.812);
-    // var boxGeometry = new THREE.BoxGeometry(boxDims.x, boxDims.y, boxDims.z); // the block to render inside
-    // boxGeometry.doubleSided = true;
-
     /* video texture */
     //file = "out_623_812_59_4096_4096.webm";
     //file = "datanshadows_623_812_59_4096_4096.ogv"
     //file = "out_251_325_34_256_4096.ogv";
-    // file = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/55896829e4b0b14cba17273c/data";
-    // dims = getDimensions("out_251_327_34_256_4096.ogv");
-    file = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/5589758be4b0b14cba172762/data";
-    dims = getDimensions("out_345_449_54_512_8192.ogv");
+    file = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/55896829e4b0b14cba17273c/data";
+    dims = getDimensions("out_251_327_34_256_4096.ogv");
+    // file = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/5589758be4b0b14cba172762/data";
+    // dims = getDimensions("out_345_449_54_512_8192.ogv");
 
-    // var boxDims = new THREE.Vector3(0.345, 0.54, 0.447);
     var ds = dims.datashape;
     var boxDims = new THREE.Vector3(ds.x*0.001, ds.z*0.01, ds.y*0.001);
     var boxGeometry = new THREE.BoxGeometry(boxDims.x, boxDims.y, boxDims.z); // the block to render inside
@@ -183,19 +178,14 @@ function initVis() {
     video.crossOrigin = "Anonymous";
     video.load(); // must call after setting/changing source
     video.playbackRate = 1;
-    //video.play();
     video.addEventListener('loadeddata', function() {
        // Video is loaded and can be played
        video.autoplay = true;
        video.play();
     });
-        // video.addEventListener('timeupdate', function() {
-        //     console.log('timeupdate: ', video.currentTime);
-        // });
-    
+
     //data video
     videoImage = document.createElement( 'canvas' );
-    //document.body.appendChild(videoImage);
     videoImage.width = dims.textureshape.x / shrinkFactor;// / 2.0;
     videoImage.height = dims.textureshape.y / shrinkFactor;
 
@@ -205,7 +195,6 @@ function initVis() {
     videoImageContext.fillRect( 0, 0, videoImage.width, videoImage.height );
 
     dataTexture = new THREE.Texture( videoImage );
-    //dataTexture.flipY = false;
 
     setDataTexType(mipMapTex); // set mip mapping on or off
 
@@ -283,12 +272,11 @@ function initVis() {
 
     /*************** Add map **************/
     callback = function(land){
-        land.position.set(0.0, -5.295, 0.0);
-        //land.position.set(0.0, 0.0, 0.0);
-        //land.rotation.x = Math.PI / 2;
+        var yCoord = 5 + (boxDims.y / 2);
+        land.position.set(0.0, -yCoord, 0.0);
         scene.add(land);
     };
-    getLand(callback, 0.623, 0.812);
+    getLand(callback, boxDims.x, boxDims.z);
 
     /*************** add aquarium outline **/
     var boxOutlineMesh = new THREE.Mesh( boxGeometry );
@@ -312,9 +300,6 @@ function initVis() {
     // trackball controls
     controls = new THREE.OrbitControls(camera) 
     controls.zoomSpeed *= 0.07;
-    // controls = new THREE.FirstPersonControls(camera, renderer.domElement);
-    // controls.moveSpeed *= 0.0001;
-    // controls.rotateSpeed *= 1.0;
 }
 
 /**
@@ -346,12 +331,10 @@ function getDimensions(filename) {
 
 function animate() {
     requestAnimationFrame(animate);
-    // console.log(camera.getWorldRotation());
 
     stats.begin();
     now = Date.now();
     delta = now - then;
-    // controls.update(delta); // for fpscontrols
     if (delta > interval) {
         controls.update(delta);
         // update time stuffs
@@ -431,5 +414,3 @@ var debugaxis = function(axisLength){
     createAxis(v(0, -axisLength, 0), v(0, axisLength, 0), 0x00FF00);
     createAxis(v(0, 0, -axisLength), v(0, 0, axisLength), 0x0000FF);
 };
-
-debugaxis(1)

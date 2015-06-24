@@ -79,12 +79,9 @@ function buildLand( data, width, height ){
         specular: 0x444444,
         shininess: 1
     });
-    // (tranparent = true) allows sea to be seen.  Perhaps sea level should be dropped.
 
     var geometry = new THREE.PlaneGeometry(width, height, dem_width-1, dem_height-1);
-    //var geometry = new THREE.PlaneGeometry(1, 1, dem_width-1, dem_height-1)
     var scale_fac = 1.0 /  (distns * 1000.0);
-    //var scale_fac = 2000.0 /  (distns * 1000000.0);
     for(i = 0; i < data.length; i++){
         var ht = data[i];
         if(ht < 0){ht = 0;}
@@ -95,9 +92,7 @@ function buildLand( data, width, height ){
     var mesh = new THREE.Mesh(geometry, material);
     mesh.castShadow = false;
     mesh.receiveShadow = true;
-    mesh.position.set(0,0,0);
     mesh.rotation.x = - Math.PI * 0.5;
-    mesh.material.side = THREE.DoubleSide; // added
     return mesh;
 };
 

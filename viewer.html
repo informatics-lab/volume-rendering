@@ -69,7 +69,7 @@
     varying vec3 worldSpaceCoords;
     varying vec4 projectedCoords;
 
-    uniform sampler2D backFaceTexture, dataTexture;//, lightTexture; //i.e. tex and cubeTex
+    uniform sampler2D backFaceTexture, dataTexture;//i.e. tex and cubeTex
     uniform vec3 lightPosition;
     uniform vec3 lightColor;
     uniform float lightIntensity;
@@ -234,12 +234,6 @@
         return vec4(accumulatedColor.r, accumulatedColor.g, accumulatedColor.b, accumulatedAlpha);
     }
 
-    // vec4 getLightPathRGBA(sampler2D tex, vec3 currentPosition, vec3 dataShape, vec2 texShape) {
-    //     float lightDatum = sampleAs3DTexture(lightTexture, currentPosition, dataShape, texShape);
-    //     vec4 lightPathRGBA = getLightPathRGBAfromDatum(lightDatum);
-    //     return lightPathRGBA;
-    // }
-
     vec4 getLightPathRGBA(vec3 currentPosition, vec3 lightPosition, float steps, sampler2D tex) {
         vec4 lightPathRGBA = castShadows(currentPosition, lightPosition, steps, tex);
         return lightPathRGBA;
@@ -285,7 +279,7 @@
             lightPathRGBA = getLightPathRGBA(currentPosition, light.position, shadeSteps, tex);
 
 
-            lightRayRGBA = (vec4(1.0) - lightPathRGBA) * 2.0;// * vec4(1.0, 1.0, 1.0, 3.0);
+            lightRayRGBA = (vec4(1.0) - lightPathRGBA);// * vec4(1.0, 1.0, 1.0, 3.0);
 
             apparentRGB = (1.0 - accumulatedAlpha) * dataRGBA.rgb * lightRayRGBA.rgb * dataRGBA.a * lightRayRGBA.a * 1.5;
 
