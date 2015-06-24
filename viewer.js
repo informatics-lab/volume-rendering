@@ -305,7 +305,7 @@ function initVis() {
 
     // trackball controls
     controls = new THREE.OrbitControls(camera) 
-    controls.zoomSpeed *= 0.07;
+    controls.zoomSpeed *= 1.0;
 }
 
 /**
