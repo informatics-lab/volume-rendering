@@ -1,3 +1,7 @@
+//HTTPS redirect
+if (window.location.protocol != "http:")
+    window.location.href = "http:" + window.location.href.substring(window.location.protocol.length);
+
 CLOUD = "https://dl.dropboxusercontent.com/u/2665124/volume_rendering_data/";
 
 var renderer, sceneBackFace, sceneRayMarch, scene, camera, clock, backFaceTexture, dataTexture, uniforms, attributes;
