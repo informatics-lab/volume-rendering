@@ -198,9 +198,9 @@
         vec3 currentPosition = startPos;
         //The color accumulator.
         vec3 accumulatedColor = vec3(0.0);
-    
-        //The alpha value accumulated so far.
-        float accumulatedAlpha = 0.0;
+        
+        float tm = 1.0;
+        float dtm;
     
         //How long has the ray travelled so far.
         float accumulatedLength = 0.0;
@@ -211,27 +211,26 @@
         //Perform the ray marching iterations
         for(int i = 0; i < MAX_SHADE_STEPS; i++){
             //Get the voxel intensity value from the 3D texture.    
+            // where alpha is the intensity i.e. value of the data point
             dataSample = getDataRGBA(tex, currentPosition, dataShape, texShape);
+            dtm = exp(-dataSample.a); // alpha correction factor has already been applied
+            tm *= dtm;
             //Perform the composition.
-            accumulatedColor += (1.0 - accumulatedAlpha) * dataSample.xyz * dataSample.a;
-            //accumulatedColor += dataSample;
-            //Store the alpha accumulated so far.
-            accumulatedAlpha += (1.0 - accumulatedAlpha) * dataSample.a;
-            //accumulatedAlpha += dataSample.a;
+            accumulatedColor += (1.0 - dtm) * dataSample.xyz * tm;
         
             //Advance the ray.
             currentPosition += deltaDirection;
             accumulatedLength += deltaDirectionLength;
                       
             //If the length traversed is more than the ray length, or if the alpha accumulated reaches 1.0 then exit.
-            if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 - ambience ){
+            if(accumulatedLength >= rayLength || tm <= 1.0 - ambience ){
                 break;
             }
         }
-        if (accumulatedAlpha >= 1.0) {
-            accumulatedAlpha = 1.0;
+        if (tm <= 0.0) {
+            tm = 0.0;
         }
-        return vec4(accumulatedColor.r, accumulatedColor.g, accumulatedColor.b, accumulatedAlpha);
+        return vec4(accumulatedColor, (1.0-tm));
     }
 
     vec4 getLightPathRGBA(vec3 currentPosition, vec3 lightPosition, float steps, sampler2D tex) {
@@ -258,9 +257,9 @@
 
         //The color accumulator.
         vec3 accumulatedColor = vec3(0.0);
-    
-        //The alpha value accumulated so far.
-        float accumulatedAlpha = 0.0;
+        
+        float tm = 1.0;
+        float dtm;
     
         //How long has the ray travelled so far.
         float accumulatedLength = 0.0;
@@ -268,38 +267,35 @@
         //vec4 dataSample;
         vec4 dataRGBA;
         vec4 lightPathRGBA;
-        vec4 lightRayRGBA;
+        vec4 lightRayRGBI;
         vec3 apparentRGB;
 
         //Perform the ray marching iterations
         for(int i = 0; i < MAX_STEPS; i++){
             //Get the voxel intensity value from the 3D texture.
             dataRGBA = getDataRGBA(tex, currentPosition, dataShape, texShape);
+            dtm = exp(-dataRGBA.a);
+            tm *= dtm;
             //lightPathRGBA = getLightPathRGBA(lightTexture, currentPosition, dataShape, texShape);
             lightPathRGBA = getLightPathRGBA(currentPosition, light.position, shadeSteps, tex);
+            lightRayRGBI = (vec4(1.0) - lightPathRGBA);
 
-
-            lightRayRGBA = (vec4(1.0) - lightPathRGBA);// * vec4(1.0, 1.0, 1.0, 3.0);
-
-            apparentRGB = (1.0 - accumulatedAlpha) * dataRGBA.rgb * lightRayRGBA.rgb * dataRGBA.a * lightRayRGBA.a * 1.5;
+            apparentRGB = (1.0 - dtm) * dataRGBA.rgb * lightRayRGBI.rgb * dataRGBA.a * lightRayRGBI.a * tm;
 
             //Perform the composition.
             accumulatedColor += apparentRGB;
-            //Store the alpha accumulated so far.
-            accumulatedAlpha += pow((1.0 - accumulatedAlpha), 0.5) * dataRGBA.a;
-            //accumulatedAlpha += dataRGBA.a;
 
-            //Adva      nce the ray.
+            //Advance the ray.
             currentPosition += deltaDirection;
             accumulatedLength += deltaDirectionLength;
                       
             //If the length traversed is more than the ray length, or if the alpha accumulated reaches 1.0 then exit.
-            if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 ){
+            if(accumulatedLength >= rayLength || tm <= 0.0 ){
                 break;
             }
         }
 
-        return vec4(accumulatedColor.xyz, accumulatedAlpha);
+        return vec4(accumulatedColor.xyz, 1.0-tm);
     }
 
 

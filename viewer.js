@@ -11,7 +11,7 @@ var video, videoImage, videoImageContext;
 
 var nSteps = 64;
 var shadeSteps = 16;
-var opacFac = 15.0;
+var opacFac = 1.0;
 var alphaCorrection = getAlphaCorrection(opacFac, nSteps);
 var mipMapTex = false;
 var downScaling = 1;
