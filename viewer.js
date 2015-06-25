@@ -164,8 +164,8 @@ function initVis() {
     //file = "out_623_812_59_4096_4096.webm";
     //file = "datanshadows_623_812_59_4096_4096.ogv"
     //file = "out_251_325_34_256_4096.ogv";
-    //var url = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/55896829e4b0b14cba17273c";
-    var url = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/5589758be4b0b14cba172762";
+    var url = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/55896829e4b0b14cba17273c";
+    // var url = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/5589758be4b0b14cba172762";
     var file = url + "/data";
     var dims = getDims(url);
 
