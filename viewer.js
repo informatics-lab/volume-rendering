@@ -55,6 +55,10 @@ animate();
 
 var g;
 
+function toggleMacro() {
+    play_macro = !play_macro;
+}
+
 function getAlphaCorrection(opacFace, nSteps){
     return opacFac/nSteps;
 }
