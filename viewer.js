@@ -2,7 +2,7 @@
 if (window.location.protocol != "http:")
     window.location.href = "http:" + window.location.href.substring(window.location.protocol.length);
 
-CLOUD = "https://dl.dropboxusercontent.com/u/2665124/volume_rendering_data/";
+DATA_FILE = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/558b2640e4b09ea974afd93a";
 
 var renderer, sceneBackFace, sceneRayMarch, scene, camera, clock, backFaceTexture, dataTexture, uniforms, attributes;
 var stats;
@@ -11,7 +11,7 @@ var video, videoImage, videoImageContext;
 
 var nSteps = 64;
 var shadeSteps = 16;
-var opacFac = 4.0;
+var opacFac = 15.0;
 var alphaCorrection = getAlphaCorrection(opacFac, nSteps);
 var mipMapTex = false;
 var downScaling = 1;
@@ -160,16 +160,9 @@ function initVis() {
     dirLight.position.set(0.0, 20.0, 0.0);
     ambLight = new THREE.AmbientLight(lightColor);
 
-    /* video texture */
-    //file = "out_623_812_59_4096_4096.webm";
-    //file = "datanshadows_623_812_59_4096_4096.ogv"
-    //file = "out_251_325_34_256_4096.ogv";
-    var url = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/55896829e4b0b14cba17273c";
+    var url = DATA_FILE;
     var file = url + "/data";
     var dims = getDims(url);
-    //dims = getDimensions("out_251_327_34_256_4096.ogv");
-    // file = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/5589758be4b0b14cba172762/data";
-    // dims = getDimensions("out_345_449_54_512_8192.ogv");
 
     var ds = dims.datashape;
     var boxDims = new THREE.Vector3(ds.x*0.001, ds.z*0.01, ds.y*0.001);
