@@ -300,6 +300,9 @@
                 break;
             }
         }
+        if (accumulatedAlpha < 1.0) {
+            accumulatedColor *= (1.0 / accumulatedAlpha);
+        }
 
         return vec4(accumulatedColor.xyz, accumulatedAlpha);
     }
