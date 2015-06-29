@@ -1,0 +1,26 @@
+{
+  "name": "volume-rendering",
+  "version": "0.0.0",
+  "homepage": "https://github.com/met-office-lab/volume-rendering",
+  "authors": [
+    "niall.robinson@informaticslab.co.uk"
+  ],
+  "license": "GPL3",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "threejs": "*",
+    "dat-gui": "~0.5.1",
+    "font-awsome": "~4.3.0",
+    "stats.js": "*",
+    "threejs-controls": "git://github.com/lememora/threejs-controls.git",
+    "informatics-badge-directive": "*",
+    "jquery": "~2.1.4",
+    "angular": "~1.4.1"
+  }
+}

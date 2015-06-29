@@ -6,19 +6,30 @@
 </head>
 <body>
 
-<div>
-    <img src="https://dl.dropboxusercontent.com/u/2665124/volume_rendering_data/prototype.png" style="max-width: 15%; height: auto; position: absolute; top:75%; left: 1%">
+<link href="bower_components/font-awsome/css/font-awesome.min.css" rel="stylesheet">
+<div class="btn" title="Toggle camera macro playback" href="#" style="height: auto; position: absolute; top:2%; left: 60px" onclick="toggleMacro()">
+  <i class="fa fa-video-camera fa-3x"></i>
 </div>
 
-<script type="text/javascript" src="./lib/three.min.js"></script>
-<!-- <script type="text/javascript" src="./lib/FirstPersonControlsDrag.js"></script> -->
-<script type="text/javascript" src= "./lib/OrbitControls.js"></script>
-<script type="text/javascript" src="./lib/Stats.js"></script>
-<script type="text/javascript" src="./lib/dat.gui.min.js"></script>
-<script type="text/javascript" src="https://code.jquery.com/jquery-git2.min.js"></script>
+<div class="btn" thisTileN="View separte levels app" href="#" style="height: auto; position: absolute; top:2%; left: 120px" onclick="window.location.href='http://julydemo.3dvis.informaticslab.co.uk/uk-weather-3d/view3d/'">
+  <i class="fa fa-align-justify fa-3x"></i>
+</div>
+
+<div ng-app="viewerApp">
+    <informatics-badge></informatics-badge>
+</div>
+
+<script type="text/javascript" src="bower_components/threejs/build/three.min.js"></script>
+<script type="text/javascript" src="bower_components/threejs-controls/src/OrbitControls.js"></script>
+<script type="text/javascript" src="bower_components/stats.js/build/stats.min.js"></script>
+<script type="text/javascript" src="bower_components/dat-gui/build/dat.gui.min.js"></script>
+<script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="bower_components/angular/angular.min.js"></script>
+<script src="viewerApp.js"></script>
+<script src="bower_components/informatics-badge-directive/src/informatics-badge.js"></script>
+
 
 <!-- first pass shaders -->
-
 <script id="vertexShaderBackFace" type="x-shader/x-vertex">
     varying vec3 worldSpaceCoords;
 
@@ -299,6 +310,9 @@
             if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 ){
                 break;
             }
+        }
+        if (accumulatedAlpha < 1.0) {
+            accumulatedColor *= (1.0 / accumulatedAlpha);
         }
 
         return vec4(accumulatedColor.xyz, accumulatedAlpha);
