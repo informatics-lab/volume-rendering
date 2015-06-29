@@ -29,7 +29,7 @@ function demPaletteFn() {
     var fn = function(v){
         v = ~~v; //removes everything after the decimal point
         if (v < 1) {
-            return {r:0,g:0,b:0,a:0};
+            return {r:0,g:2,b:13,a:255}; // sea blue
         }
         else {
             v = (v>255) ? 255 : v;
