@@ -2,7 +2,9 @@
 if (window.location.protocol != "http:")
     window.location.href = "http:" + window.location.href.substring(window.location.protocol.length);
 
-CLOUD = "https://dl.dropboxusercontent.com/u/2665124/volume_rendering_data/";
+DATA_VIDEO = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/55896829e4b0b14cba17273c";
+Z_SCALING = 3.0;
+CAMERA_STANDOFF = 1.3;
 
 var renderer, sceneBackFace, sceneRayMarch, scene, camera, clock, backFaceTexture, dataTexture, uniforms, attributes;
 var stats;
@@ -152,11 +154,18 @@ function initGUI() {
 
 function initVis() {
     clock = new THREE.Clock();
-    
+
+    /* video texture */
+    var url = DATA_VIDEO;
+    var file = url + "/data";
+    var dims = getDims(url);
+  
     /*** Camera ***/
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 1000);
     camera.rotation.order = "YXZ";
-    camera.position.set(2.0, 1.0, 2.0);
+    camera.position.set(dims.datashape.x * CAMERA_STANDOFF,
+                        dims.datashape.z * CAMERA_STANDOFF * Z_SCALING * 1.1, // 1.1 fac to get rid of 
+                        dims.datashape.y * CAMERA_STANDOFF * 1.05); // geometrically perfect camera perspective
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     /*** lights ***/
@@ -164,17 +173,9 @@ function initVis() {
     dirLight.position.set(0.0, 20.0, 0.0);
     ambLight = new THREE.AmbientLight(lightColor);
 
-    /* video texture */
-    //file = "out_623_812_59_4096_4096.webm";
-    //file = "datanshadows_623_812_59_4096_4096.ogv"
-    //file = "out_251_325_34_256_4096.ogv";
-    //var url = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/55896829e4b0b14cba17273c";
-    var url = "http://ec2-52-16-246-202.eu-west-1.compute.amazonaws.com:9000/molab-3dwx-ds/media/5589758be4b0b14cba172762";
-    var file = url + "/data";
-    var dims = getDims(url);
-
-    var ds = dims.datashape;
-    var boxDims = new THREE.Vector3(ds.x*0.001, ds.z*0.01, ds.y*0.001);
+    var boxDims = new THREE.Vector3(dims.datashape.x,
+                                    dims.datashape.z*Z_SCALING,
+                                    dims.datashape.y);
     var boxGeometry = new THREE.BoxGeometry(boxDims.x, boxDims.y, boxDims.z); // the block to render inside
     boxGeometry.doubleSided = true;
 
