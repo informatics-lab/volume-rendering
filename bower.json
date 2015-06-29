@@ -20,6 +20,7 @@
     "stats.js": "*",
     "threejs-controls": "git://github.com/lememora/threejs-controls.git",
     "informatics-badge-directive": "*",
-    "jquery": "~2.1.4"
+    "jquery": "~2.1.4",
+    "angular": "~1.4.1"
   }
 }

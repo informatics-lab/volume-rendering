@@ -15,11 +15,19 @@
   <i class="fa fa-align-justify fa-3x"></i>
 </div>
 
+<div ng-app="viewerApp">
+    <informatics-badge></informatics-badge>
+</div>
+
 <script type="text/javascript" src="bower_components/threejs/build/three.min.js"></script>
 <script type="text/javascript" src="bower_components/threejs-controls/src/OrbitControls.js"></script>
 <script type="text/javascript" src="bower_components/stats.js/build/stats.min.js"></script>
 <script type="text/javascript" src="bower_components/dat-gui/build/dat.gui.min.js"></script>
 <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="bower_components/angular/angular.min.js"></script>
+<script src="viewerApp.js"></script>
+<script src="bower_components/informatics-badge-directive/src/informatics-badge.js"></script>
+
 
 <!-- first pass shaders -->
 <script id="vertexShaderBackFace" type="x-shader/x-vertex">
