@@ -147,7 +147,8 @@ function initGUI() {
     // stats
     stats = new Stats();
     stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '5px';
+    stats.domElement.style.top = '91%';
+    stats.domElement.style.left = '93%';
     stats.domElement.style.margin = '5px';
     document.body.appendChild( stats.domElement );
 }

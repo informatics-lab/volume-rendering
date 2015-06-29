@@ -6,22 +6,16 @@
 </head>
 <body>
 
-<div>
-    <img src="https://dl.dropboxusercontent.com/u/2665124/volume_rendering_data/prototype.png" style="max-width: 15%; height: auto; position: absolute; top:75%; left: 1%">
+<link href="lib/font-awesome/css/font-awesome.css" rel="stylesheet">
+<div class="btn" title="Toggle camera macro playback" href="#" style="height: auto; position: absolute; top:2%; left: 2%" onclick="toggleMacro()">
+  <i class="fa fa-video-camera fa-3x"></i>
 </div>
-<div>
-    <button type="button" class="btn btn-default" onclick="toggleMacro()" style="max-width: 15%; height: auto; position: absolute; top:2%; left: 10%">
-        <span class="glyphicon glyphicon-facetime-video" aria-hidden="true"></span>
-    </button>
-</div>
-<div>
-    <button type="button" class="btn btn-danger" style="max-width: 15%; height: auto; position: absolute; top:2%; left: 15%" onclick="window.location.href='http://julydemo.3dvis.informaticslab.co.uk/uk-weather-3d/view3d/'">
-        Esc
-    </button>
+
+<div class="btn" thisTileN="View separte levels app" href="#" style="height: auto; position: absolute; top:2%; left: 6%" onclick="window.location.href='http://julydemo.3dvis.informaticslab.co.uk/uk-weather-3d/view3d/'">
+  <i class="fa fa-align-justify fa-3x"></i>
 </div>
 
 <script type="text/javascript" src="./lib/three.min.js"></script>
-<!-- <script type="text/javascript" src="./lib/FirstPersonControlsDrag.js"></script> -->
 <script type="text/javascript" src= "./lib/OrbitControls.js"></script>
 <script type="text/javascript" src="./lib/Stats.js"></script>
 <script type="text/javascript" src="./lib/dat.gui.min.js"></script>
