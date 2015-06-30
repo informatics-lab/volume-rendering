@@ -12,9 +12,12 @@ function demPaletteFn() {
 
     var context = canvas.getContext( '2d' );
     var grad = context.createLinearGradient(0,0,256,0);
-    grad.addColorStop(0, "#108010");
-    grad.addColorStop(.6, "#606010");
-    grad.addColorStop(1, "#906030");
+    grad.addColorStop(0, "#000000");
+    // grad.addColorStop(.6, "#606010");
+    // grad.addColorStop(1, "#906030");
+    grad.addColorStop(.3, "#101504");
+    grad.addColorStop(.7, "#101005");
+    grad.addColorStop(1, "#303030");
 
     context.fillStyle = grad;
     context.fillRect(0, 0, 256, 1);
