@@ -1,3 +1,5 @@
+var LAND_FACTOR = 0.001;
+
 function demPaletteFn() {
     /*
     Returns a function, which accepts a number and
@@ -81,7 +83,7 @@ function buildLand( data, width, height ){
     });
 
     var geometry = new THREE.PlaneGeometry(width, height, dem_width-1, dem_height-1);
-    var scale_fac = 1.0 /  (distns * 1000.0);
+    var scale_fac = 1.0 /  (distns * 1000.0 * LAND_FACTOR);
     for(i = 0; i < data.length; i++){
         var ht = data[i];
         if(ht < 0){ht = 0;}
