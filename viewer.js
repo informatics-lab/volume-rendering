@@ -162,7 +162,7 @@ function initVis() {
     var dims = getDims(url);
   
     /*** Camera ***/
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 1000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 10000);
     camera.rotation.order = "YXZ";
     camera.position.set(dims.datashape.x * CAMERA_STANDOFF,
                         dims.datashape.z * CAMERA_STANDOFF * Z_SCALING * 1.1, // 1.1 fac to get rid of 
